@@ -22,6 +22,8 @@ struct ContentView: View {
     @State private var activateSleepAlarmSheet: Bool = false
     @State private var tip: String = ""
     @State private var setTimeToWakeUp = Date()
+    @State private var hasSeenSheet = false
+    @State private var showSheet = false
     @State private var totalNoiseData: Double = 0.0
     private var clampedValue: Double {
         for i in noiseData ?? [0.0] {
@@ -143,6 +145,13 @@ struct ContentView: View {
                 .navigationTitle("Home")
             }
             .preferredColorScheme(.dark)
+        }
+        .onAppear {
+            showSheet = true
+        }
+        .sheet(isPresented: $showSheet) {
+            GuidedAccessSheet(hasSeenSheet: $hasSeenSheet)
+                .interactiveDismissDisabled()
         }
     }
 }
