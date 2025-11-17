@@ -8,15 +8,35 @@
 import SwiftUI
 import Charts
 
+enum timeScale: String, CaseIterable {
+    case week = "Week"
+    case month = "Month"
+    case sixmonths = "6 Months"
+    case year = "Year"
+}
+
 struct DurationView: View {
-    @Binding var durationData: [Int]?
-    @State private var selectedDate = Date.now
+    @Binding var durationData: [sleepDurationStruct]?
+    @State private var selectedTimeScale: timeScale = .week
     var body: some View {
         VStack {
             HStack {
-                DatePicker("", selection: $selectedDate, displayedComponents: [.date])
-                    .datePickerStyle(.compact)
-                    .offset(x: -140)
+                Picker("Time Schedule", selection: $selectedTimeScale) {
+                    ForEach(timeScale.allCases, id: \.self) { value in
+                        Text("\(value.rawValue)")
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding()
+            }
+            if durationData != nil {
+                if selectedTimeScale == .week {
+                    DurationWeekView(durationData: $durationData)
+                }else if selectedTimeScale == .month {
+                    DurationMonthView(durationData: $durationData)
+                }
+            }else {
+                
             }
             Spacer()
         }
@@ -25,5 +45,5 @@ struct DurationView: View {
 }
 
 #Preview {
-    DurationView(durationData: .constant([0]))
+    DurationView(durationData: .constant([sleepDurationStruct(date: Date.now, duration: 0)]))
 }
