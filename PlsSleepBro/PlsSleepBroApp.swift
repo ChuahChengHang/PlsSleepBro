@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct PlsSleepBroApp: App {
@@ -13,5 +14,6 @@ struct PlsSleepBroApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [sleepDurationStruct.self])
     }
 }

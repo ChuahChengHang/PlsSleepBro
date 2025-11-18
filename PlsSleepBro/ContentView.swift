@@ -6,17 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @State private var durationData: [sleepDurationStruct]? = [
-        sleepDurationStruct(date: Calendar.current.date(byAdding: .day, value: -6, to: .now)!, duration: 9),
-        sleepDurationStruct(date: Calendar.current.date(byAdding: .day, value: -5, to: .now)!, duration: 10),
-        sleepDurationStruct(date: Calendar.current.date(byAdding: .day, value: -4, to: .now)!, duration: 10),
-        sleepDurationStruct(date: Calendar.current.date(byAdding: .day, value: -3, to: .now)!, duration: 11),
-        sleepDurationStruct(date: Calendar.current.date(byAdding: .day, value: -2, to: .now)!, duration: 11),
-        sleepDurationStruct(date: Calendar.current.date(byAdding: .day, value: -1, to: .now)!, duration: 12),
-        sleepDurationStruct(date: Calendar.current.date(byAdding: .day, value: 0, to: .now)!, duration: 12)
-    ]
+    @Environment(\.modelContext) private var context
+    @Query private var durationData: [sleepDurationStruct]
     @State private var lightData: [Double]?
     @State private var noiseData: [Double]?
     @State private var activateSleepAlarmSheet: Bool = false
@@ -25,6 +19,8 @@ struct ContentView: View {
     @State private var hasSeenSheet = false
     @State private var showSheet = false
     @State private var totalNoiseData: Double = 0.0
+    @State private var progress: CGFloat = 0.0
+    @State private var durationSlept: String = "0h"
     private var clampedValue: Double {
         for i in noiseData ?? [0.0] {
             totalNoiseData += i
@@ -37,10 +33,10 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                if durationData != nil && lightData != nil && noiseData != nil {
+                if !durationData.isEmpty && lightData != nil && noiseData != nil {
                     RoundedRectangle(cornerRadius: 40)
                         .fill(.secondary)
-                        .frame(width: 370, height: 120)
+                        .frame(width: 380, height: 120)
                         .overlay(
                             VStack {
                                 HStack {
@@ -62,13 +58,14 @@ struct ContentView: View {
                     activateSleepAlarmSheet = true
                 }label: {
                     RoundedRectangle(cornerRadius: 14)
-                        .frame(width: 360, height: 200)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 380, height: 200)
                         .overlay(
                             VStack {
                                 HStack {
                                     Text("Alarm")
-                                        .foregroundStyle(.black)
-                                        .font(.title2)
+                                        .foregroundStyle(.white)
+                                        .font(.title)
                                         .bold()
                                     Spacer()
                                 }
@@ -82,16 +79,55 @@ struct ContentView: View {
                 }
                 .glassEffect(in: RoundedRectangle(cornerRadius: 14))
                 NavigationLink {
-                    DurationView(durationData: $durationData)
+                    DurationView()
                 }label: {
                     RoundedRectangle(cornerRadius: 14)
-                        .frame(width: 360, height: 200)
+                        .frame(width: 380, height: 200)
                         .overlay(
                             VStack {
                                 HStack {
-                                    Text("Duration")
-                                        .foregroundStyle(.black)
-                                        .font(.title2)
+                                    VStack{
+                                        Text("Duration")
+                                            .foregroundStyle(.white)
+                                            .font(.title)
+                                            .bold()
+                                        Text("TODAY")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.gray)
+                                            .bold()
+                                        Spacer()
+                                        Text(durationSlept)
+                                            .foregroundStyle(.white)
+                                            .font(.title2)
+                                        Spacer()
+                                    }
+                                    Spacer()
+                                    ZStack {
+                                        ActivityRingView(progress: $progress)
+                                        Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
+                                            .foregroundStyle(.white)
+                                            .font(.largeTitle)
+                                            .bold()
+                                    }
+                                }
+                                Spacer()
+                            }
+                                .padding()
+                        )
+                }
+                .foregroundStyle(Color.gray.opacity(0.2))
+                .glassEffect(in: RoundedRectangle(cornerRadius: 14))
+                NavigationLink {
+                    
+                }label: {
+                    RoundedRectangle(cornerRadius: 14)
+                        .frame(width: 380, height: 200)
+                        .overlay(
+                            VStack {
+                                HStack {
+                                    Text("Light")
+                                        .foregroundStyle(.white)
+                                        .font(.title)
                                         .bold()
                                     Spacer()
                                 }
@@ -100,20 +136,19 @@ struct ContentView: View {
                                 .padding()
                         )
                 }
-                .glassEffect(in: RoundedRectangle(cornerRadius: 14))
-                RoundedRectangle(cornerRadius: 14)
-                    .frame(width: 360, height: 200)
+                    .foregroundStyle(Color.gray.opacity(0.2))
+                    .glassEffect(in: RoundedRectangle(cornerRadius: 14))
                 NavigationLink {
-                    
+                    NoiseView()
                 }label: {
                     RoundedRectangle(cornerRadius: 14)
-                        .frame(width: 360, height: 200)
+                        .frame(width: 380, height: 200)
                         .overlay(
                             VStack {
                                 HStack {
                                     Text("Noise")
-                                        .foregroundStyle(.black)
-                                        .font(.title2)
+                                        .foregroundStyle(.white)
+                                        .font(.title)
                                         .bold()
                                     Spacer()
                                 }
@@ -123,11 +158,11 @@ struct ContentView: View {
                                         Image(systemName: "speaker.fill")
                                             .resizable()
                                             .frame(width: 34, height: 40)
-                                            .foregroundStyle(.black)
+                                            .foregroundStyle(.white)
                                         ForEach(0..<10) { index in
                                             Rectangle()
                                                 .frame(width: 14, height: 40)
-                                                .foregroundStyle(index < filledBlocks ? Color.primary : Color.clear)
+                                                .foregroundStyle(index < filledBlocks ? Color.white : Color.clear)
                                                 .overlay(
                                                     Rectangle()
                                                         .stroke(Color.primary, lineWidth: 2)
@@ -141,14 +176,62 @@ struct ContentView: View {
                             }
                         )
                 }
-                .scrollIndicators(.hidden)
-                .navigationTitle("Home")
+                .foregroundStyle(Color.gray.opacity(0.2))
+                .glassEffect(in: RoundedRectangle(cornerRadius: 14))
             }
+            .navigationTitle("Home")
             .preferredColorScheme(.dark)
+            .scrollIndicators(.hidden)
         }
         .onAppear {
-            showSheet = true
+            if hasSeenSheet {
+                return
+            }else {
+                showSheet = true
+            }
+            let now = Date()
+            if !durationData.isEmpty {
+                let data = durationData
+                let index = data.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: now) })
+                let duration = data[index!].duration
+                let totalMinutes = Int(duration * 60)
+                
+                if totalMinutes < 60 {
+                    durationSlept = "\(totalMinutes)min"
+                } else {
+                    let hours = totalMinutes / 60
+                    let minutes = totalMinutes % 60
+                    
+                    if minutes == 0 {
+                        durationSlept = "\(hours)h"
+                    } else {
+                        durationSlept = "\(hours)h \(minutes)min"
+                    }
+                }
+                progress = CGFloat(duration) / 10
+            } else {
+                progress = 0.0
+            }
         }
+//                .onAppear {
+//                    var sampleData: [sleepDurationStruct] {
+//                        let calendar = Calendar.current
+//                        return (0..<365).map { offset in
+//                            let date = calendar.date(byAdding: .day, value: -offset, to: .now)!
+//                            let duration = Double.random(in: 6.0...10.9)
+//                            return sleepDurationStruct(date: date, duration: Double(duration))
+//                        }
+//                    }
+//                    for i in sampleData {
+//                        context.insert(i)
+//                    }
+//                    do {
+//                        try context.save()
+//                        print("successfully injected data")
+//                    }catch {
+//                        print("error: \(error.localizedDescription)")
+//                    }
+//                }
         .sheet(isPresented: $showSheet) {
             GuidedAccessSheet(hasSeenSheet: $hasSeenSheet)
                 .interactiveDismissDisabled()
@@ -159,3 +242,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+

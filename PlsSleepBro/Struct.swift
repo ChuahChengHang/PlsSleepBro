@@ -6,9 +6,18 @@
 //
 
 import Foundation
+import SwiftData
 
-struct sleepDurationStruct: Identifiable, Hashable {
-    var id = UUID()
+@Model
+class sleepDurationStruct: Equatable {
     var date: Date
-    var duration: Int
+    var duration: Double
+    
+    init(date: Date, duration: Double) {
+        self.date = date
+        self.duration = duration
+    }
+    static func == (lhs: sleepDurationStruct, rhs: sleepDurationStruct) -> Bool {
+        return lhs.date == rhs.date
+    }
 }

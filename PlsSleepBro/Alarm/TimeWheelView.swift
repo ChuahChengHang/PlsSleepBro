@@ -27,7 +27,7 @@ struct TimeWheelView: View {
             }
 
             Rectangle()
-                .fill(Color.gray)
+                .fill(Color.red)
                 .frame(width: 4, height: 35)
                 .offset(y: -123)
                 .rotationEffect(.degrees(angle))

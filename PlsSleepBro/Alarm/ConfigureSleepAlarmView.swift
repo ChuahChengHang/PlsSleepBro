@@ -65,7 +65,7 @@ struct ConfigureSleepAlarmView: View {
                 }
             }label: {
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(selectedSnoozeMinute == 0 && selectedSnoozeSecond == 0 ? .gray : .orange)
+                    .fill(selectedSnoozeMinute == 0 && selectedSnoozeSecond == 0 ? .gray : .red)
                     .frame(width: 370, height: 70)
                     .overlay(
                         Text("Sleep Now")
