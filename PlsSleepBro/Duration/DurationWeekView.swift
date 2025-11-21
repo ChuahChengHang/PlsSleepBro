@@ -22,23 +22,24 @@ struct DurationWeekView: View {
                 let startOfCurrentWeek = calendar.date(
                     from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
                 )!
-
+                
                 let startOfWeek = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: startOfCurrentWeek)!
-
+                
                 let weekDates = (0..<7).compactMap { offset in
                     calendar.date(byAdding: .day, value: offset, to: startOfWeek)
                 }
-
+                
                 let weekData = weekDates.map { date -> (date: Date, duration: Double) in
                     if let entry = durationData.first(where: { calendar.isDate($0.date, inSameDayAs: date) }) {
-                        return (date, entry.duration)
+                        let yesterday = calendar.date(byAdding: .day, value: -1, to: date)!
+                        return (yesterday, entry.duration)
                     } else {
                         return (date, 0)
                     }
                 }
-
+                
                 let averageDuration = weekData.map { $0.duration }.reduce(0, +) / 7
-
+                
                 Chart(weekData, id: \.date) { value in
                     LineMark(
                         x: .value("Day", value.date),
@@ -48,12 +49,12 @@ struct DurationWeekView: View {
                         x: .value("Day", value.date),
                         y: .value("Hours", value.duration)
                     )
-
+                    
                     RuleMark(y: .value("Average", averageDuration))
                         .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
                         .foregroundStyle(.yellow)
                         .annotation(position: .bottom) { Text("avg").foregroundColor(.yellow) }
-
+                    
                     RuleMark(y: .value("Recommended", 10))
                         .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
                         .foregroundStyle(.green)

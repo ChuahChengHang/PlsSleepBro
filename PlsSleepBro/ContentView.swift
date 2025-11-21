@@ -28,7 +28,6 @@ struct ContentView: View {
     @State private var lighttip: String = ""
     @State private var noisetip: String = ""
     @AppStorage("showSleepView") private var showSleepView: Bool = false
-    @AppStorage("durationSet") private var durationSet: String = "0h"
     var body: some View {
         if !showSleepView {
             NavigationStack {
@@ -41,81 +40,21 @@ struct ContentView: View {
                         }
                     }
                     Button {
-                        activateSleepAlarmSheet = true
+                        sleepTime = Date.now
+                        withAnimation {
+                            showSleepView = true
+                        }
                     }label: {
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(width: 380, height: 200)
+                        RoundedRectangle(cornerRadius: 40)
+                            .fill(Color.red)
+                            .frame(width: 380, height: 70)
                             .overlay(
-                                VStack {
-                                    HStack {
-                                        Text("Alarm")
-                                            .foregroundStyle(.white)
-                                            .font(.title)
-                                            .bold()
-                                        Spacer()
-                                    }
-                                    Spacer()
-                                    ZStack{
-                                        Ellipse()
-                                            .trim(from: 0, to: 0.5)
-                                            .stroke(Color.white, lineWidth: 6)
-                                            .rotationEffect(.degrees(180))
-                                            .frame(width: 260, height: 130)
-                                            .offset(y:-8)
-                                        Image(systemName: "triangle.fill")
-                                            .resizable()
-                                            .foregroundStyle(.white)
-                                            .frame(width:15, height:16)
-                                            .offset(x:-129, y:8)
-                                            .rotationEffect(.degrees(180))
-                                        //                                    Rectangle()
-                                        //                                        .foregroundStyle(.white)
-                                        //                                        .frame(width:6, height:12)
-                                        //                                        .offset(x:-130, y:-14)
-                                        Spacer()
-                                        HStack{
-                                            VStack{
-                                                Image(systemName:"sunset.fill")
-                                                    .resizable()
-                                                    .foregroundStyle(.white)
-                                                    .frame(width:70, height:70)
-                                                    .offset(y:40)
-                                                //                                            Text("9pm")
-                                                //                                                .foregroundStyle(.white)
-                                                //                                                .font(.title2)
-                                            }
-                                            Spacer()
-                                            VStack {
-                                                Text("\(sleepTime, format: .dateTime.hour().minute()) → \(setTimeToWakeUp, format: .dateTime.hour().minute())")
-                                                    .foregroundStyle(.white)
-                                                    .font(.title2)
-                                                Text(durationSet)
-                                                    .foregroundStyle(.white)
-                                                    .font(.title3)
-                                            }
-                                            Spacer()
-                                            VStack{
-                                                Image(systemName: "sunrise.fill")
-                                                    .resizable()
-                                                    .foregroundStyle(.white)
-                                                    .frame(width:70, height:70)
-                                                    .offset(y:40)
-                                                //                                            Text("7am")
-                                                //                                                .foregroundStyle(.white)
-                                                //                                                .font(.title2)
-                                            }
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, maxHeight: 140)
-                                }
-                                    .padding()
+                                Text("Sleep Now")
+                                    .foregroundStyle(.white)
                             )
+                        
                     }
-                    .sheet(isPresented: $activateSleepAlarmSheet) {
-                        ConfigureSleepAlarmView(setTimeToWakeUp: $setTimeToWakeUp, sleepTime: $sleepTime, showSleepView: $showSleepView)
-                    }
-                    .glassEffect(in: RoundedRectangle(cornerRadius: 14))
+                    .glassEffect(in: RoundedRectangle(cornerRadius: 40))
                     NavigationLink {
                         DurationView()
                     }label: {
@@ -245,10 +184,9 @@ struct ContentView: View {
                     }else {
                         showSheet = true
                     }
-                    let now = Date()
                     if !durationData.isEmpty {
                         let data = durationData
-                        let index = data.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: now) })
+                        let index = data.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: .now) })
                         if let index = index {
                             let duration = data[index].duration
                             let totalMinutes = Int(duration * 60)
@@ -265,54 +203,29 @@ struct ContentView: View {
                                     durationSlept = "\(hours)h \(minutes)min"
                                 }
                             }
-                            progress = CGFloat(duration) / 10
-                        }else {
-                            durationSlept = "0h"
                         }
                     } else {
                         progress = 0.0
                     }
                     let calendar = Calendar.current
-
+                    
                     let sleep = sleepTime
                     var wake = setTimeToWakeUp
-
+                    
                     if wake <= sleep {
                         wake = calendar.date(byAdding: .day, value: 1, to: wake)!
                     }
-
+                    
                     let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
                     let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
                     let clampedNoise = min(max(totalNoise, 0), 100)
                     noiseFilledBlocks = Int((clampedNoise / 100 * 10).rounded())
-
+                    
                     let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake }
                     let totalLight = lightInRange.reduce(0) { $0 + $1.light }
                     let clampedLight = min(max(totalLight, 0), 100)
                     lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
                     updateTips()
-                }
-                .onChange(of: setTimeToWakeUp) {
-                    let calendar = Calendar.current
-                    let sleepComponents = calendar.dateComponents([.hour, .minute], from: sleepTime)
-                    let wakeComponents = calendar.dateComponents([.hour, .minute], from: setTimeToWakeUp)
-                    
-                    let sleepMinutes = (sleepComponents.hour ?? 0) * 60 + (sleepComponents.minute ?? 0)
-                    var wakeMinutes = (wakeComponents.hour ?? 0) * 60 + (wakeComponents.minute ?? 0)
-                    
-                    if wakeMinutes <= sleepMinutes {
-                        wakeMinutes += 24 * 60
-                    }
-                    
-                    let totalMinutes = wakeMinutes - sleepMinutes
-                    
-                    if totalMinutes < 60 {
-                        durationSet = "\(totalMinutes)min"
-                    } else {
-                        let hrs = totalMinutes / 60
-                        let mins = totalMinutes % 60
-                        durationSet = mins == 0 ? "\(hrs)h" : "\(hrs)h \(mins)min"
-                    }
                 }
                 
                 .onChange(of: durationData) {
@@ -341,14 +254,14 @@ struct ContentView: View {
                 }
                 .onChange(of: noiseData) {
                     let calendar = Calendar.current
-
+                    
                     let sleep = sleepTime
                     var wake = setTimeToWakeUp
-
+                    
                     if wake <= sleep {
                         wake = calendar.date(byAdding: .day, value: 1, to: wake)!
                     }
-
+                    
                     let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
                     let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
                     let clampedNoise = min(max(totalNoise, 0), 100)
@@ -356,10 +269,10 @@ struct ContentView: View {
                 }
                 .onChange(of: lightData) {
                     let calendar = Calendar.current
-
+                    
                     let sleep = sleepTime
                     var wake = setTimeToWakeUp
-
+                    
                     if wake <= sleep {
                         wake = calendar.date(byAdding: .day, value: 1, to: wake)!
                     }
