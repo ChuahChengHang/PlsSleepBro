@@ -27,26 +27,25 @@ struct SleepView: View {
                 Text("Guided Access")
                     .padding()
             }
-            .sheet(isPresented: $showGuidedAccessSheet) {
-                GuidedAccessView()
-            Text("Please keep your phone's back camera facing up so we can track the amount of light around your area.")
-            }
             Button {
                 let calendar = Calendar.current
+
                 let sleepComponents = calendar.dateComponents([.hour, .minute], from: sleepTime)
                 let wakeComponents = calendar.dateComponents([.hour, .minute], from: Date.now)
-                
+
                 let sleepMinutes = (sleepComponents.hour ?? 0) * 60 + (sleepComponents.minute ?? 0)
                 var wakeMinutes = (wakeComponents.hour ?? 0) * 60 + (wakeComponents.minute ?? 0)
-                
+
                 if wakeMinutes <= sleepMinutes {
                     wakeMinutes += 24 * 60
                 }
-                
-                let totalHours = Double((wakeMinutes - sleepMinutes) / 60)
-                
+
+                let minutesSlept = wakeMinutes - sleepMinutes
+                let totalHours = Double(minutesSlept) / 60.0
+
                 let entry = sleepDurationStruct(date: Date.now, duration: totalHours)
                 context.insert(entry)
+
                 do {
                     print(entry)
                     try context.save()
@@ -66,6 +65,12 @@ struct SleepView: View {
                             .foregroundStyle(.white)
                     )
             }
+            Text("Tip:")
+                .bold()
+            Text("Enable guided access so we can track the light and noise data when you're sleeping.")
+                .padding()
+            Text("Keep your back camera facing up so we can track the light.")
+                .padding()
         }
         .preferredColorScheme(.dark)
     }

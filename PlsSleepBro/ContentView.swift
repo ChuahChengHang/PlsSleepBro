@@ -13,6 +13,7 @@ struct ContentView: View {
     @Query private var lightData: [lightStruct]
     @Query private var durationData: [sleepDurationStruct]
     @Query private var noiseData: [noiseStruct]
+    
     @State private var activateSleepAlarmSheet: Bool = false
     @AppStorage("wakeUpTime") private var setTimeToWakeUp = Date()
     @AppStorage("guidedAccessSheetSeen") private var hasSeenSheet = false
@@ -28,76 +29,67 @@ struct ContentView: View {
     @State private var lighttip: String = ""
     @State private var noisetip: String = ""
     @AppStorage("showSleepView") private var showSleepView: Bool = false
+    
     var body: some View {
         if !showSleepView {
             NavigationStack {
                 ScrollView {
                     if !durationData.isEmpty && !lightData.isEmpty && !noiseData.isEmpty {
-                        if sleeptip == "" || lighttip == "" || noisetip == "" {
-                            
-                        }else {
+                        if !sleeptip.isEmpty && !lighttip.isEmpty && !noisetip.isEmpty {
                             TipsView(sleeptip: $sleeptip, lighttip: $lighttip, noisetip: $noisetip)
                         }
                     }
                     Button {
                         sleepTime = Date.now
-                        withAnimation {
-                            showSleepView = true
-                        }
-                    }label: {
+                        withAnimation { showSleepView = true }
+                    } label: {
                         RoundedRectangle(cornerRadius: 40)
                             .fill(Color.red)
                             .frame(width: 380, height: 70)
                             .overlay(
                                 Text("Sleep Now")
-                                    .foregroundStyle(.white)
+                                    .foregroundColor(.white)
+                                    .bold()
                             )
-                        
                     }
                     .glassEffect(in: RoundedRectangle(cornerRadius: 40))
                     NavigationLink {
                         DurationView()
-                    }label: {
+                    } label: {
                         RoundedRectangle(cornerRadius: 14)
                             .frame(width: 380, height: 200)
                             .overlay(
                                 VStack {
                                     HStack {
-                                        VStack{
+                                        VStack(alignment: .leading) {
                                             Text("Duration")
-                                                .foregroundStyle(.white)
+                                                .foregroundColor(.white)
                                                 .font(.title)
                                                 .bold()
                                             Text("TODAY")
                                                 .font(.subheadline)
-                                                .foregroundStyle(.gray)
+                                                .foregroundColor(.gray)
                                                 .bold()
-                                            Spacer()
-                                            Text(durationSlept)
-                                                .foregroundStyle(.white)
-                                                .font(.title2)
-                                            Spacer()
                                         }
                                         Spacer()
                                         ZStack {
                                             ActivityRingView(progress: $progress)
                                                 .animation(.easeOut(duration: 1.2), value: progress)
-                                            Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
-                                                .foregroundStyle(.white)
-                                                .font(.largeTitle)
+                                            Text(durationSlept)
+                                                .foregroundColor(.white)
+                                                .font(.title2)
                                                 .bold()
                                         }
                                     }
-                                    Spacer()
                                 }
                                     .padding()
                             )
                     }
-                    .foregroundStyle(Color.gray.opacity(0.2))
+                    .foregroundColor(Color.gray.opacity(0.2))
                     .glassEffect(in: RoundedRectangle(cornerRadius: 14))
                     NavigationLink {
                         LightView()
-                    }label: {
+                    } label: {
                         RoundedRectangle(cornerRadius: 14)
                             .frame(width: 380, height: 200)
                             .overlay(
@@ -131,12 +123,12 @@ struct ContentView: View {
                                     Spacer()
                                 }
                             )
-                            .foregroundStyle(Color.gray.opacity(0.2))
+                            .foregroundColor(Color.gray.opacity(0.2))
                             .glassEffect(in: RoundedRectangle(cornerRadius: 14))
                     }
                     NavigationLink {
                         NoiseView()
-                    }label: {
+                    } label: {
                         RoundedRectangle(cornerRadius: 14)
                             .frame(width: 380, height: 200)
                             .overlay(
@@ -171,175 +163,110 @@ struct ContentView: View {
                                 }
                             )
                     }
-                    .foregroundStyle(Color.gray.opacity(0.2))
+                    .foregroundColor(Color.gray.opacity(0.2))
                     .glassEffect(in: RoundedRectangle(cornerRadius: 14))
                     .navigationTitle("Home")
                 }
                 .preferredColorScheme(.dark)
                 .scrollIndicators(.hidden)
                 .onAppear {
-                    progress = 0.0
-                    if hasSeenSheet {
-                        return
-                    }else {
-                        showSheet = true
-                    }
-                    if !durationData.isEmpty {
-                        let data = durationData
-                        let index = data.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: .now) })
-                        if let index = index {
-                            let duration = data[index].duration
-                            let totalMinutes = Int(duration * 60)
-                            
-                            if totalMinutes < 60 {
-                                durationSlept = "\(totalMinutes)min"
-                            } else {
-                                let hours = totalMinutes / 60
-                                let minutes = totalMinutes % 60
-                                
-                                if minutes == 0 {
-                                    durationSlept = "\(hours)h"
-                                } else {
-                                    durationSlept = "\(hours)h \(minutes)min"
-                                }
-                            }
-                        }
-                    } else {
-                        progress = 0.0
-                    }
-                    let calendar = Calendar.current
-                    
-                    let sleep = sleepTime
-                    var wake = setTimeToWakeUp
-                    
-                    if wake <= sleep {
-                        wake = calendar.date(byAdding: .day, value: 1, to: wake)!
-                    }
-                    
-                    let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
-                    let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
-                    let clampedNoise = min(max(totalNoise, 0), 100)
-                    noiseFilledBlocks = Int((clampedNoise / 100 * 10).rounded())
-                    
-                    let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake }
-                    let totalLight = lightInRange.reduce(0) { $0 + $1.light }
-                    let clampedLight = min(max(totalLight, 0), 100)
-                    lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
+                    updateDurationRing()
                     updateTips()
+                    updateLightRing()
+                    updateNoiseRing()
+                    if !hasSeenSheet { showSheet = true }
                 }
-                
                 .onChange(of: durationData) {
-                    if !durationData.isEmpty {
-                        let data = durationData
-                        let index = data.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: .now) })
-                        let duration = data[index!].duration
-                        let totalMinutes = Int(duration * 60)
-                        
-                        if totalMinutes < 60 {
-                            durationSlept = "\(totalMinutes)min"
-                        } else {
-                            let hours = totalMinutes / 60
-                            let minutes = totalMinutes % 60
-                            
-                            if minutes == 0 {
-                                durationSlept = "\(hours)h"
-                            } else {
-                                durationSlept = "\(hours)h \(minutes)min"
-                            }
-                        }
-                        progress = CGFloat(duration) / 10
-                    } else {
-                        progress = 0.0
-                    }
-                }
-                .onChange(of: noiseData) {
-                    let calendar = Calendar.current
-                    
-                    let sleep = sleepTime
-                    var wake = setTimeToWakeUp
-                    
-                    if wake <= sleep {
-                        wake = calendar.date(byAdding: .day, value: 1, to: wake)!
-                    }
-                    
-                    let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
-                    let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
-                    let clampedNoise = min(max(totalNoise, 0), 100)
-                    noiseFilledBlocks = Int((clampedNoise / 100 * 10).rounded())
+                    updateDurationRing()
                 }
                 .onChange(of: lightData) {
-                    let calendar = Calendar.current
-                    
-                    let sleep = sleepTime
-                    var wake = setTimeToWakeUp
-                    
-                    if wake <= sleep {
-                        wake = calendar.date(byAdding: .day, value: 1, to: wake)!
-                    }
-                    let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake }
-                    let totalLight = lightInRange.reduce(0) { $0 + $1.light }
-                    let clampedLight = min(max(totalLight, 0), 100)
-                    lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
+                    updateLightRing()
+                }
+                .onChange(of: noiseData) {
+                    updateNoiseRing()
                 }
                 .sheet(isPresented: $showSheet) {
                     GuidedAccessSheet(hasSeenSheet: $hasSeenSheet)
                         .interactiveDismissDisabled()
                 }
             }
-        }else {
+        } else {
             SleepView(showSleepView: $showSleepView, sleepTime: $sleepTime)
         }
     }
+    
+    func updateDurationRing() {
+        let calendar = Calendar.current
+        guard let todayEntry = durationData.first(where: { calendar.isDate($0.date, inSameDayAs: Date()) }) else {
+            durationSlept = "0min"
+            withAnimation { progress = 0.0 }
+            return
+        }
+        let duration = todayEntry.duration
+        let totalMinutes = Int(duration * 60)
+        if totalMinutes < 60 {
+            durationSlept = "\(totalMinutes)min"
+        } else {
+            let hours = totalMinutes / 60
+            let minutes = totalMinutes % 60
+            durationSlept = minutes == 0 ? "\(hours)h" : "\(hours)h \(minutes)min"
+        }
+        withAnimation { progress = CGFloat(duration / 10) }
+    }
+    
+    func updateLightRing() {
+        var wake = setTimeToWakeUp
+        let sleep = sleepTime
+        if wake <= sleep {
+            wake = Calendar.current.date(byAdding: .day, value: 1, to: wake)!
+        }
+        let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake }
+        let totalLight = lightInRange.reduce(0) { $0 + $1.light }
+        let clampedLight = min(max(totalLight, 0), 100)
+        lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
+    }
+    
+    func updateNoiseRing() {
+        var wake = setTimeToWakeUp
+        let sleep = sleepTime
+        if wake <= sleep {
+            wake = Calendar.current.date(byAdding: .day, value: 1, to: wake)!
+        }
+        let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
+        let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
+        let clampedNoise = min(max(totalNoise, 0), 100)
+        noiseFilledBlocks = Int((clampedNoise / 100 * 10).rounded())
+    }
+    
     func updateTips() {
-        let today = Date.now
+        let today = Date()
         let duration = durationData.filter {
             Calendar.current.isDate($0.date, equalTo: today, toGranularity: .day)
-        }
-            .map { $0.duration }
-            .reduce(0, +)
+        }.map { $0.duration }.reduce(0, +)
         let light = lightData.filter {
             Calendar.current.isDate($0.date, equalTo: today, toGranularity: .day)
-        }
-            .map { $0.light }
-            .reduce(0, +)
+        }.map { $0.light }.reduce(0, +)
         let noise = noiseData.filter {
             Calendar.current.isDate($0.date, equalTo: today, toGranularity: .day)
+        }.map { $0.noise }.reduce(0, +)
+        if duration > 10 { sleeptip = "Too much sleep 😴" }
+        else if duration >= 8 { sleeptip = "Great amount of sleep! 👍" }
+        else { sleeptip = "Try to sleep a bit more 😪" }
+        switch light {
+        case ...10: lighttip = "Perfect darkness level 🌙"
+        case ...40: lighttip = "Slightly bright room, still okay 🫤"
+        case ...80: lighttip = "A bit bright, try dimming 💡"
+        default: lighttip = "Too much light! Can harm sleep 😵‍💫"
         }
-            .map { $0.noise }
-            .reduce(0, +)
-        if duration > 10 {
-            sleeptip = "Too much sleep 😴"
-        } else if duration >= 8 {
-            sleeptip = "Great amount of sleep! 👍"
-        } else {
-            sleeptip = "Try to sleep a bit more 😪"
-        }
-        
-        if light <= 10 {
-            lighttip = "Perfect darkness level 🌙"
-        } else if light <= 40 {
-            lighttip = "Your room was slightly bright, but still okay.🫤"
-        } else if light <= 80 {
-            lighttip = "Your room was a bit bright. Try dimming the lights 💡"
-        } else {
-            lighttip = "Too much light! This can harm sleep quality 😵‍💫"
-        }
-        
-        if noise <= 30 {
-            noisetip = "Very quiet environment, ideal for sleep 😌"
-            return
-        } else if noise <= 40 {
-            noisetip = "Some noise detected, but acceptable.🤨"
-            return
-        } else if noise <= 55 {
-            noisetip = "Noise might have disturbed your sleep 🫨"
-            return
-        } else {
-            noisetip = "Very loud environment! Try reducing noise ⚠️"
-            return
+        switch noise {
+        case ...30: noisetip = "Very quiet environment 😌"
+        case ...40: noisetip = "Some noise detected, acceptable 🤨"
+        case ...55: noisetip = "Noise might disturb sleep 🫨"
+        default: noisetip = "Very loud! Reduce noise ⚠️"
         }
     }
 }
+
 
 #Preview {
     ContentView()

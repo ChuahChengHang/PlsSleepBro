@@ -41,6 +41,7 @@ struct DurationView: View {
                     }
                     .sensoryFeedback(.impact(weight: .light), trigger: selectedTimeScale)
                     .pickerStyle(.segmented)
+
                     if selectedTimeScale == .week {
                         HStack {
                             VStack {
@@ -57,7 +58,7 @@ struct DurationView: View {
                             }
                             Spacer()
                         }
-                    }else if selectedTimeScale == .month {
+                    } else if selectedTimeScale == .month {
                         HStack {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text("WEEKLY AVERAGE")
@@ -73,7 +74,7 @@ struct DurationView: View {
                             }
                             Spacer()
                         }
-                    }else if selectedTimeScale == .sixmonths {
+                    } else if selectedTimeScale == .sixmonths {
                         HStack {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text("MONTHLY AVERAGE")
@@ -89,7 +90,7 @@ struct DurationView: View {
                             }
                             Spacer()
                         }
-                    }else {
+                    } else {
                         HStack {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text("MONTHLY AVERAGE")
@@ -108,6 +109,7 @@ struct DurationView: View {
                     }
                 }
                 .padding()
+
                 RoundedRectangle(cornerRadius: 18)
                     .fill(.quaternary)
                     .frame(width: 380, height: 400)
@@ -116,14 +118,14 @@ struct DurationView: View {
                             if !durationData.isEmpty {
                                 if selectedTimeScale == .week {
                                     DurationWeekView(dailyAverage: $dailyAverage, weekOffset: $weekOffset)
-                                }else if selectedTimeScale == .month {
+                                } else if selectedTimeScale == .month {
                                     DurationMonthView(weeklyAverage: $weeklyAverage, weekOffset: $monthOffset)
-                                }else if selectedTimeScale == .sixmonths {
+                                } else if selectedTimeScale == .sixmonths {
                                     SixMonthsView(average: $sixMonthlyAverage, offset: $sixMonthOffset)
-                                }else {
+                                } else {
                                     DurationYearView(average: $monthlyAverage, offset: $yearOffset)
                                 }
-                            }else {
+                            } else {
                                 Text("No Data Available")
                                     .foregroundStyle(.white)
                                     .font(.largeTitle)
@@ -132,216 +134,50 @@ struct DurationView: View {
                         }
                     )
                     .glassEffect(in: RoundedRectangle(cornerRadius: 18))
+
                 ZStack {
                     ActivityRingView(progress: $progress)
-                    if selectedTimeScale == .week {
-                        VStack {
+                    VStack {
+                        if selectedTimeScale == .week {
                             Text("TODAY")
                                 .foregroundStyle(.gray)
                                 .font(.title)
                             Text("\(String(format: "%.1f", hoursSlept))h / 10h")
                                 .font(.largeTitle)
-                            Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
-                                .foregroundStyle(.white)
-                                .font(.subheadline)
-                                .bold()
-                        }
-                    }else if selectedTimeScale == .month {
-                        VStack {
+                        } else if selectedTimeScale == .month {
                             Text("THIS WEEK")
                                 .foregroundStyle(.gray)
                                 .font(.title)
                             Text("\(String(format: "%.1f", hoursSlept))h / 70h")
                                 .font(.largeTitle)
-                            Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
-                                .foregroundStyle(.white)
-                                .font(.subheadline)
-                                .bold()
-                        }
-                    }else if selectedTimeScale == .sixmonths {
-                        VStack {
+                        } else if selectedTimeScale == .sixmonths {
                             Text("THIS MONTH")
                                 .foregroundStyle(.gray)
                                 .font(.title)
                             Text("\(String(format: "%.1f", hoursSlept))h / 280h")
                                 .font(.largeTitle)
-                            Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
-                                .foregroundStyle(.white)
-                                .font(.subheadline)
-                                .bold()
-                        }
-                    }else {
-                        VStack {
+                        } else {
                             Text("THIS MONTH")
                                 .foregroundStyle(.gray)
                                 .font(.title)
                             Text("\(String(format: "%.1f", hoursSlept))h / 280h")
                                 .font(.largeTitle)
-                            Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
-                                .foregroundStyle(.white)
-                                .font(.subheadline)
-                                .bold()
                         }
+                        Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
+                            .foregroundStyle(.white)
+                            .font(.subheadline)
+                            .bold()
                     }
                 }
                 .padding()
                 .onAppear {
-                    if !durationData.isEmpty {
-                        if selectedTimeScale == .week {
-                            let today = Date.now
-                            let calendar = Calendar.current
-                            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-                            hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfWeek, toGranularity: .day)}
-                                .map { $0.duration }
-                                .reduce(0, +)
-                            let startOfCurrentWeek = calendar.date(
-                                from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
-                            )!
-                            let startDate = calendar.date(
-                                byAdding: .weekOfYear,
-                                value: -3,
-                                to: startOfWeek
-                            )!
-                            let endDate = calendar.date(
-                                byAdding: .day,
-                                value: 27,
-                                to: startDate
-                            )!
-                            let formatter = DateFormatter()
-                            formatter.dateFormat = "d MMM"
-                            dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
-                            print("\(hoursSlept)")
-                            progress = CGFloat(hoursSlept / 10)
-                        }else if selectedTimeScale == .month {
-                            let today = Date.now
-                            let calendar = Calendar.current
-                            let startOfCurrentWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-                            hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfCurrentWeek, toGranularity: .weekOfYear)}
-                                .map { $0.duration }
-                                .reduce(0, +)
-                            let startOfWeek = calendar.date(byAdding: .weekOfYear, value: monthOffset, to: startOfCurrentWeek)!
-                            let startDate = calendar.date(
-                                byAdding: .weekOfYear,
-                                value: -3,
-                                to: startOfWeek
-                            )!
-                            let endDate = calendar.date(
-                                byAdding: .day,
-                                value: 27,
-                                to: startDate
-                            )!
-                            let formatter = DateFormatter()
-                            formatter.dateFormat = "d MMM"
-                            dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
-                            print("\(hoursSlept)")
-                            progress = CGFloat(hoursSlept / 70)
-                        }else if selectedTimeScale == .sixmonths {
-                            let today = Date.now
-                            let calendar = Calendar.current
-                            let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-                            hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfThisMonth, toGranularity: .month)
-                            }
-                            .map { $0.duration }
-                            .reduce(0, +)
-                            print("\(hoursSlept)")
-                            progress = CGFloat(hoursSlept / 280)
-                        }else {
-                            let today = Date.now
-                            let calendar = Calendar.current
-                            let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-                            hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfThisMonth, toGranularity: .month)
-                            }
-                            .map { $0.duration }
-                            .reduce(0, +)
-                            print("\(hoursSlept)")
-                            progress = CGFloat(hoursSlept / 280)
-                        }
-                    }else {
-                        hoursSlept = 0.0
-                    }
+                    updateHoursSlept()
+                }
+                .onChange(of: durationData) {
+                    updateHoursSlept()
                 }
                 .onChange(of: selectedTimeScale) {
-                    if selectedTimeScale == .week {
-                        let today = Date.now
-                        let calendar = Calendar.current
-                        let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-                        hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfWeek, toGranularity: .day)}
-                            .map { $0.duration }
-                            .reduce(0, +)
-                        print("\(hoursSlept)")
-                        progress = CGFloat(hoursSlept / 10)
-                    }else if selectedTimeScale == .month {
-                        let today = Date.now
-                        let calendar = Calendar.current
-                        let startOfCurrentWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-                        hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfCurrentWeek, toGranularity: .weekOfYear)}
-                            .map { $0.duration }
-                            .reduce(0, +)
-                        print("\(hoursSlept)")
-                        progress = CGFloat(hoursSlept / 70)
-                    }else if selectedTimeScale == .sixmonths {
-                        let today = Date.now
-                        let calendar = Calendar.current
-                        let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-                        hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfThisMonth, toGranularity: .month)
-                        }
-                        .map { $0.duration }
-                        .reduce(0, +)
-                        print("\(hoursSlept)")
-                        progress = CGFloat(hoursSlept / 280)
-                    }else {
-                        let today = Date.now
-                        let calendar = Calendar.current
-                        let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-                        hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfThisMonth, toGranularity: .month)
-                        }
-                        .map { $0.duration }
-                        .reduce(0, +)
-                        print("\(hoursSlept)")
-                        progress = CGFloat(hoursSlept / 280)
-                    }
-                }
-                .onChange(of: dailyAverage) {
-                    let today = Date.now
-                    let calendar = Calendar.current
-                    let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-                    hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfWeek, toGranularity: .day)}
-                        .map { $0.duration }
-                        .reduce(0, +)
-                    print("\(hoursSlept)")
-                    progress = CGFloat(hoursSlept / 10)
-                }
-                .onChange(of: weeklyAverage) {
-                    let today = Date.now
-                    let calendar = Calendar.current
-                    let startOfCurrentWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-                    hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfCurrentWeek, toGranularity: .weekOfYear)}
-                        .map { $0.duration }
-                        .reduce(0, +)
-                    print("\(hoursSlept)")
-                    progress = CGFloat(hoursSlept / 70)
-                }
-                .onChange(of: sixMonthlyAverage) {
-                    let today = Date.now
-                    let calendar = Calendar.current
-                    let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-                    hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfThisMonth, toGranularity: .month)
-                    }
-                    .map { $0.duration }
-                    .reduce(0, +)
-                    print("\(hoursSlept)")
-                    progress = CGFloat(hoursSlept / 280)
-                }
-                .onChange(of: monthlyAverage) {
-                    let today = Date.now
-                    let calendar = Calendar.current
-                    let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-                    hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfThisMonth, toGranularity: .month)
-                    }
-                    .map { $0.duration }
-                    .reduce(0, +)
-                    print("\(hoursSlept)")
-                    progress = CGFloat(hoursSlept / 280)
+                    updateHoursSlept()
                 }
                 .onChange(of: weekOffset) {
                     let calendar = Calendar.current
@@ -405,52 +241,86 @@ struct DurationView: View {
                         byAdding: .month,
                         value: 6,
                         to: startOfSelectedPeriod
-                    )!.addingTimeInterval(-1)
+                    )!
                     
                     let formatter = DateFormatter()
                     formatter.dateFormat = "d MMM"
-                    
-                    let startString = formatter.string(from: startOfSelectedPeriod)
-                    let endString = formatter.string(from: endOfSelectedPeriod)
-                    
-                    dateText = "\(startString) – \(endString)"
+                    dateText = "\(formatter.string(from: startOfSelectedPeriod)) – \(formatter.string(from: endOfSelectedPeriod))"
                 }
                 .onChange(of: yearOffset) {
                     let calendar = Calendar.current
                     let today = Date()
                     
-                    let startOfMonth = calendar.date(
-                        from: calendar.dateComponents([.year, .month], from: today)
+                    let startOfYear = calendar.date(
+                        from: calendar.dateComponents([.year], from: today)
                     )!
                     
                     let startOfSelectedPeriod = calendar.date(
-                        byAdding: .month,
-                        value: yearOffset * 6,
-                        to: startOfMonth
+                        byAdding: .year,
+                        value: yearOffset,
+                        to: startOfYear
                     )!
                     
                     let endOfSelectedPeriod = calendar.date(
-                        byAdding: .month,
-                        value: 6,
+                        byAdding: .year,
+                        value: 1,
                         to: startOfSelectedPeriod
-                    )!.addingTimeInterval(-1)
+                    )!
                     
                     let formatter = DateFormatter()
                     formatter.dateFormat = "d MMM"
-                    
-                    let startString = formatter.string(from: startOfSelectedPeriod)
-                    let endString = formatter.string(from: endOfSelectedPeriod)
-                    
-                    dateText = "\(startString) – \(endString)"
+                    dateText = "\(formatter.string(from: startOfSelectedPeriod)) – \(formatter.string(from: endOfSelectedPeriod))"
                 }
                 Spacer()
-                
             }
             .navigationTitle("Sleep Duration")
         }
         .preferredColorScheme(.dark)
     }
+
+    func updateHoursSlept() {
+        let calendar = Calendar.current
+        let today = Date()
+        var startDate: Date
+        var endDate: Date
+        var maxHours: Double
+
+        switch selectedTimeScale {
+        case .week:
+            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
+            startDate = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: startOfWeek)!
+            endDate = calendar.date(byAdding: .day, value: 7, to: startDate)!
+            maxHours = 10
+        case .month:
+            let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
+            startDate = calendar.date(byAdding: .month, value: monthOffset, to: startOfMonth)!
+            endDate = calendar.date(byAdding: .month, value: 1, to: startDate)!
+            maxHours = 70
+        case .sixmonths:
+            let startOfSixMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
+            startDate = calendar.date(byAdding: .month, value: sixMonthOffset * 6, to: startOfSixMonth)!
+            endDate = calendar.date(byAdding: .month, value: 6, to: startDate)!
+            maxHours = 280
+        case .year:
+            let startOfYear = calendar.date(from: calendar.dateComponents([.year], from: today))!
+            startDate = calendar.date(byAdding: .year, value: yearOffset, to: startOfYear)!
+            endDate = calendar.date(byAdding: .year, value: 1, to: startDate)!
+            maxHours = 560
+        }
+
+        hoursSlept = durationData
+            .filter { $0.date >= startDate && $0.date < endDate }
+            .map { $0.duration }
+            .reduce(0, +)
+
+        progress = CGFloat(min(hoursSlept / maxHours, 1.0))
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM"
+        dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
+    }
 }
+
 
 #Preview {
     DurationView()
