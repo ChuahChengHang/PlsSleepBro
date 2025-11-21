@@ -1,16 +1,15 @@
 //
-//  NoiseView.swift
+//  LightView.swift
 //  PlsSleepBro
 //
-//  Created by Chuah Cheng Hang on 18/11/25.
+//  Created by Chuah Cheng Hang on 19/11/25.
 //
 
 import SwiftUI
 import SwiftData
-import Charts
 
-struct NoiseView: View {
-    @Query private var noiseData: [noiseStruct]
+struct LightView: View {
+    @Query private var lightData: [lightStruct]
     @State private var selectedDate: Date = Date.now
     @State private var offset: Int = 0
     @State private var suggestion: [String] = []
@@ -26,16 +25,18 @@ struct NoiseView: View {
                         .fill(.quaternary)
                         .frame(width: 380, height: 400)
                         .overlay(
-                            NoiseChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion)
+                            LightChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion)
                         )
+                }
+                VStack {
                     HStack {
                         Text("Suggestions")
                             .font(.title)
                             .bold()
+                            .padding()
                         Spacer()
                     }
-                    .padding()
-                    if noiseData.isEmpty {
+                    if lightData.isEmpty {
                         RoundedRectangle(cornerRadius: 18)
                             .fill(.quaternary)
                             .frame(width: 380, height: 400)
@@ -56,14 +57,15 @@ struct NoiseView: View {
                             }
                         }
                     }
+                    Spacer()
                 }
             }
             .preferredColorScheme(.dark)
-            .navigationTitle("Noise")
+            .navigationTitle("Light")
         }
     }
 }
 
 #Preview {
-    NoiseView()
+    LightView()
 }

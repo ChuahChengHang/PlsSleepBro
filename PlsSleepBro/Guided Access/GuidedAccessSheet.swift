@@ -7,6 +7,10 @@ struct GuidedAccessSheet: View {
     var body: some View {
         VStack {
             Spacer()
+            Image(systemName: "lock.rectangle.fill")
+                .resizable()
+                .frame(width: 140, height: 100)
+                .foregroundStyle(.red)
             Text(guidedAccess ? "Guided Access is ON" : "Guided Access is OFF")
                 .font(.title)
                 .padding(.top)
@@ -62,6 +66,7 @@ Then turn it ON and set a passcode.
                     dismiss()
                 }label: {
                     RoundedRectangle(cornerRadius: 14)
+                        .fill(.red)
                         .frame(width: 370, height: 50)
                         .overlay(
                             Text("Done")
@@ -70,6 +75,7 @@ Then turn it ON and set a passcode.
                         )
                         .glassEffect(in: RoundedRectangle(cornerRadius: 14))
                 }
+                .sensoryFeedback(.impact(weight: .light), trigger: hasSeenSheet)
             }
         }
         .preferredColorScheme(.dark)

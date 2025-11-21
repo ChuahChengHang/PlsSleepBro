@@ -74,7 +74,7 @@ struct SixMonthsView: View {
                 }
                 .chartXScale(domain: firstMonth...lastMonth)
                 .chartXAxis {
-                    AxisMarks(values: monthStartDates) { value in
+                    AxisMarks(preset: .aligned, values: monthStartDates) { value in
                         if let date = value.as(Date.self) {
                             let label = date.formatted(.dateTime.month(.abbreviated))
                             AxisGridLine()
@@ -104,7 +104,8 @@ struct SixMonthsView: View {
                             }
                         }
                 )
-
+                .sensoryFeedback(.increase, trigger: offset)
+                .sensoryFeedback(.decrease, trigger: offset)
             } else {
                 Text("No Data Available")
             }

@@ -45,6 +45,7 @@ struct ActivityRingView: View {
                     ),
                     style: StrokeStyle(lineWidth: 20, lineCap: .round)
             ).rotationEffect(.degrees(-90))
+                .animation(.easeOut(duration: 1.2), value: progress)
 //            Circle()
 //                .frame(width: 20, height: 20)
 //                .foregroundColor(Color.darkRed)

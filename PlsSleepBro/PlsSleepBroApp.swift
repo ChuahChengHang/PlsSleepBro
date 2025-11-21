@@ -14,6 +14,6 @@ struct PlsSleepBroApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [sleepDurationStruct.self])
+        .modelContainer(for: [sleepDurationStruct.self, noiseStruct.self, lightStruct.self])
     }
 }

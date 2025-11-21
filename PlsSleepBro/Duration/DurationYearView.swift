@@ -71,7 +71,7 @@ struct DurationYearView: View {
                 }
                 .chartXScale(domain: firstMonth...lastMonth)
                 .chartXAxis {
-                    AxisMarks(values: monthlyData.map { $0.monthStart }) { value in
+                    AxisMarks(preset: .aligned, values: monthlyData.map { $0.monthStart }) { value in
                         if let date = value.as(Date.self) {
                             let label = date.formatted(.dateTime.month(.abbreviated))
                             AxisGridLine()
@@ -100,6 +100,8 @@ struct DurationYearView: View {
                             }
                         }
                 )
+                .sensoryFeedback(.increase, trigger: offset)
+                .sensoryFeedback(.decrease, trigger: offset)
             }
         }
         .preferredColorScheme(.dark)

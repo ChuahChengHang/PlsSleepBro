@@ -60,7 +60,7 @@ struct DurationWeekView: View {
                         .annotation(position: .bottom) { Text("recommended").foregroundColor(.green) }
                 }
                 .chartXAxis {
-                    AxisMarks(values: weekDates) { value in
+                    AxisMarks(preset: .aligned, values: weekDates) { value in
                         if let date = value.as(Date.self) {
                             AxisValueLabel(date.formatted(.dateTime.weekday(.abbreviated)))
                         }
@@ -79,6 +79,8 @@ struct DurationWeekView: View {
                             }
                         }
                 )
+                .sensoryFeedback(.increase, trigger: weekOffset)
+                .sensoryFeedback(.decrease, trigger: weekOffset)
                 .onAppear {
                     dailyAverage = averageDuration
                 }

@@ -9,9 +9,9 @@ import SwiftUI
 
 
 struct TimeWheelView: View {
-    @State private var angle: Double = -90
-    @State private var selectedHour: Int = 6
-    @State private var selectedMinute: Int = 0
+    @AppStorage("setTimeAngle") private var angle: Double = -90
+    @Binding var selectedHour: Int
+    @Binding var selectedMinute: Int
     @Binding var setTimeToWakeUp: Date
     var body: some View {
         ZStack {
@@ -41,6 +41,8 @@ struct TimeWheelView: View {
                         updateTimeFromAngle()
                     }
                 )
+                .sensoryFeedback(.increase, trigger: angle)
+                .sensoryFeedback(.decrease, trigger: angle)
 
             VStack {
                 Text("Selected Time To Wake Up:")
@@ -84,5 +86,5 @@ struct TimeWheelView: View {
 }
 
 #Preview {
-    TimeWheelView(setTimeToWakeUp: .constant(Date()))
+    TimeWheelView(selectedHour: .constant(6), selectedMinute: .constant(0), setTimeToWakeUp: .constant(Date.now))
 }

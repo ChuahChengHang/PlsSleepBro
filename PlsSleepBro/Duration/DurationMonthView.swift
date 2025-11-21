@@ -63,7 +63,7 @@ struct DurationMonthView: View {
                 }
                 .chartXScale(domain: weeklyData.first!.weekStart...weeklyData.last!.weekStart)
                 .chartXAxis {
-                    AxisMarks(values: weeklyData.map { $0.weekStart }) { value in
+                    AxisMarks(preset: .aligned, values: weeklyData.map { $0.weekStart }) { value in
                         if let date = value.as(Date.self) {
                             AxisValueLabel(date.formatted(.dateTime.week()))
                         }
@@ -82,6 +82,8 @@ struct DurationMonthView: View {
                             }
                         }
                 )
+                .sensoryFeedback(.increase, trigger: weekOffset)
+                .sensoryFeedback(.decrease, trigger: weekOffset)
                 .onAppear { weeklyAverage = averageDuration }
                 .onChange(of: startOfWeek) {
                     weeklyAverage = averageDuration

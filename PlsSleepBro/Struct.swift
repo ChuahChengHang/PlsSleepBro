@@ -21,3 +21,33 @@ class sleepDurationStruct: Equatable {
         return lhs.date == rhs.date
     }
 }
+
+@Model
+class noiseStruct: Equatable {
+//    @Attribute(.unique) var id: UUID = UUID()
+    var date: Date
+    var noise: Double
+    
+    init(date: Date, noise: Double) {
+        self.date = date
+        self.noise = noise
+    }
+    static func == (lhs: noiseStruct, rhs: noiseStruct) -> Bool {
+        return lhs.date == rhs.date
+    }
+}
+
+@Model
+class lightStruct: Equatable {
+//    @Attribute(.unique) var id: UUID = UUID()
+    var date: Date
+    var light: Double
+    
+    init(date: Date, light: Double) {
+        self.date = date
+        self.light = light
+    }
+    static func == (lhs: lightStruct, rhs: lightStruct) -> Bool {
+        return lhs.date == rhs.date
+    }
+}

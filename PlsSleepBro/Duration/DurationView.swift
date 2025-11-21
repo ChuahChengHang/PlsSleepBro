@@ -29,6 +29,7 @@ struct DurationView: View {
     @State private var monthOffset: Int = 0
     @State private var sixMonthOffset: Int = 0
     @State private var yearOffset: Int = 0
+    @State private var dateText: String = ""
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -38,6 +39,7 @@ struct DurationView: View {
                             Text("\(value.rawValue)")
                         }
                     }
+                    .sensoryFeedback(.impact(weight: .light), trigger: selectedTimeScale)
                     .pickerStyle(.segmented)
                     if selectedTimeScale == .week {
                         HStack {
@@ -48,6 +50,9 @@ struct DurationView: View {
                                 Text("\(String(format: "%.1f", dailyAverage)) Hours")
                                     .foregroundStyle(.red)
                                     .font(.title)
+                                    .bold()
+                                Text(dateText)
+                                    .foregroundStyle(.gray)
                                     .bold()
                             }
                             Spacer()
@@ -62,6 +67,9 @@ struct DurationView: View {
                                     .foregroundStyle(.red)
                                     .font(.title)
                                     .bold()
+                                Text(dateText)
+                                    .foregroundStyle(.gray)
+                                    .bold()
                             }
                             Spacer()
                         }
@@ -75,6 +83,9 @@ struct DurationView: View {
                                     .foregroundStyle(.red)
                                     .font(.title)
                                     .bold()
+                                Text(dateText)
+                                    .foregroundStyle(.gray)
+                                    .bold()
                             }
                             Spacer()
                         }
@@ -87,6 +98,9 @@ struct DurationView: View {
                                 Text("\(String(format: "%.1f", monthlyAverage)) Hours")
                                     .foregroundStyle(.red)
                                     .font(.title)
+                                    .bold()
+                                Text(dateText)
+                                    .foregroundStyle(.gray)
                                     .bold()
                             }
                             Spacer()
@@ -180,6 +194,22 @@ struct DurationView: View {
                             hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfWeek, toGranularity: .day)}
                                 .map { $0.duration }
                                 .reduce(0, +)
+                            let startOfCurrentWeek = calendar.date(
+                                from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
+                            )!
+                            let startDate = calendar.date(
+                                byAdding: .weekOfYear,
+                                value: -3,
+                                to: startOfWeek
+                            )!
+                            let endDate = calendar.date(
+                                byAdding: .day,
+                                value: 27,
+                                to: startDate
+                            )!
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "d MMM"
+                            dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
                             print("\(hoursSlept)")
                             progress = CGFloat(hoursSlept / 10)
                         }else if selectedTimeScale == .month {
@@ -189,6 +219,20 @@ struct DurationView: View {
                             hoursSlept = durationData.filter { calendar.isDate($0.date, equalTo: startOfCurrentWeek, toGranularity: .weekOfYear)}
                                 .map { $0.duration }
                                 .reduce(0, +)
+                            let startOfWeek = calendar.date(byAdding: .weekOfYear, value: monthOffset, to: startOfCurrentWeek)!
+                            let startDate = calendar.date(
+                                byAdding: .weekOfYear,
+                                value: -3,
+                                to: startOfWeek
+                            )!
+                            let endDate = calendar.date(
+                                byAdding: .day,
+                                value: 27,
+                                to: startDate
+                            )!
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "d MMM"
+                            dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
                             print("\(hoursSlept)")
                             progress = CGFloat(hoursSlept / 70)
                         }else if selectedTimeScale == .sixmonths {
@@ -298,6 +342,106 @@ struct DurationView: View {
                     .reduce(0, +)
                     print("\(hoursSlept)")
                     progress = CGFloat(hoursSlept / 280)
+                }
+                .onChange(of: weekOffset) {
+                    let calendar = Calendar.current
+                    let today = Date()
+                    let startOfCurrentWeek = calendar.date(
+                        from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
+                    )!
+                    
+                    let startOfWeek = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: startOfCurrentWeek)!
+                    let startDate = calendar.date(
+                        byAdding: .weekOfYear,
+                        value: -3,
+                        to: startOfWeek
+                    )!
+                    let endDate = calendar.date(
+                        byAdding: .day,
+                        value: 27,
+                        to: startDate
+                    )!
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "d MMM"
+                    dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
+                }
+                .onChange(of: monthOffset) {
+                    let calendar = Calendar.current
+                    let today = Date()
+                    let startOfCurrentWeek = calendar.date(
+                        from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
+                    )!
+                    
+                    let startOfWeek = calendar.date(byAdding: .weekOfYear, value: monthOffset, to: startOfCurrentWeek)!
+                    let startDate = calendar.date(
+                        byAdding: .weekOfYear,
+                        value: -3,
+                        to: startOfWeek
+                    )!
+                    let endDate = calendar.date(
+                        byAdding: .day,
+                        value: 27,
+                        to: startDate
+                    )!
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "d MMM"
+                    dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
+                }
+                .onChange(of: sixMonthOffset) {
+                    let calendar = Calendar.current
+                    let today = Date()
+                    
+                    let startOfMonth = calendar.date(
+                        from: calendar.dateComponents([.year, .month], from: today)
+                    )!
+                    
+                    let startOfSelectedPeriod = calendar.date(
+                        byAdding: .month,
+                        value: sixMonthOffset * 6,
+                        to: startOfMonth
+                    )!
+                    
+                    let endOfSelectedPeriod = calendar.date(
+                        byAdding: .month,
+                        value: 6,
+                        to: startOfSelectedPeriod
+                    )!.addingTimeInterval(-1)
+                    
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "d MMM"
+                    
+                    let startString = formatter.string(from: startOfSelectedPeriod)
+                    let endString = formatter.string(from: endOfSelectedPeriod)
+                    
+                    dateText = "\(startString) – \(endString)"
+                }
+                .onChange(of: yearOffset) {
+                    let calendar = Calendar.current
+                    let today = Date()
+                    
+                    let startOfMonth = calendar.date(
+                        from: calendar.dateComponents([.year, .month], from: today)
+                    )!
+                    
+                    let startOfSelectedPeriod = calendar.date(
+                        byAdding: .month,
+                        value: yearOffset * 6,
+                        to: startOfMonth
+                    )!
+                    
+                    let endOfSelectedPeriod = calendar.date(
+                        byAdding: .month,
+                        value: 6,
+                        to: startOfSelectedPeriod
+                    )!.addingTimeInterval(-1)
+                    
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "d MMM"
+                    
+                    let startString = formatter.string(from: startOfSelectedPeriod)
+                    let endString = formatter.string(from: endOfSelectedPeriod)
+                    
+                    dateText = "\(startString) – \(endString)"
                 }
                 Spacer()
                 
