@@ -4,7 +4,7 @@ struct GuidedAccessSheet: View {
     @State private var guidedAccess = UIAccessibility.isGuidedAccessEnabled
     @Binding var hasSeenSheet: Bool
     @Environment(\.dismiss) var dismiss
-    @State private var guidedAccessEnable = guidedAccessEnabled()
+    @State private var permissionModel = PermissionModel()
     var body: some View {
         VStack {
             Spacer()
@@ -12,7 +12,7 @@ struct GuidedAccessSheet: View {
                 .resizable()
                 .frame(width: 140, height: 100)
                 .foregroundStyle(.red)
-            Text(guidedAccess ? "Guided Access is ON" : "Guided Access is OFF")
+            Text(permissionModel.guidedAccess ? "Guided Access is ON" : "Guided Access is OFF")
                 .font(.title)
                 .padding(.top)
             if !guidedAccess {
@@ -69,6 +69,7 @@ Then turn it ON.
                 }label: {
                     RoundedRectangle(cornerRadius: 14)
                         .fill(.red)
+                        .shadow(radius: 8, y: 4)
                         .frame(width: 370, height: 50)
                         .overlay(
                             Text("Done")
@@ -88,11 +89,11 @@ Then turn it ON.
                 for: UIAccessibility.guidedAccessStatusDidChangeNotification
             )
         ) { _ in
-            guidedAccess = guidedAccessEnable.enabled
+            guidedAccess = permissionModel.guidedAccess
         }
         
         .onAppear {
-            guidedAccess = guidedAccessEnable.enabled
+            guidedAccess = permissionModel.guidedAccess
         }
         
         .padding()

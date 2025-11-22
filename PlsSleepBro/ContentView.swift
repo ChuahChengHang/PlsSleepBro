@@ -45,6 +45,7 @@ struct ContentView: View {
                     } label: {
                         RoundedRectangle(cornerRadius: 40)
                             .fill(Color.red)
+                            .shadow(radius: 8, y: 4)
                             .frame(width: 380, height: 70)
                             .overlay(
                                 Text("Sleep Now")
@@ -197,12 +198,14 @@ struct ContentView: View {
     
     func updateDurationRing() {
         let calendar = Calendar.current
-        guard let todayEntry = durationData.first(where: { calendar.isDate($0.date, inSameDayAs: Date()) }) else {
-            durationSlept = "0min"
-            withAnimation { progress = 0.0 }
-            return
-        }
-        let duration = todayEntry.duration
+        let today = Date.now
+        let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
+        let startDate = calendar.date(byAdding: .weekOfYear, value: 0, to: startOfWeek)!
+        let endDate = calendar.date(byAdding: .day, value: 7, to: startDate)!
+        var duration = durationData
+            .filter { $0.date >= startDate && $0.date < endDate }
+            .map { $0.duration }
+            .reduce(0, +)
         let totalMinutes = Int(duration * 60)
         if totalMinutes < 60 {
             durationSlept = "\(totalMinutes)min"

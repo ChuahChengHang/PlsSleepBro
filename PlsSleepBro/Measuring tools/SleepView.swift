@@ -8,24 +8,46 @@
 import SwiftUI
 import SwiftData
 import UIKit
+import AVFoundation
+import Combine
 
 struct SleepView: View {
     @Environment(\.modelContext) private var context
     @Binding var showSleepView: Bool
     @Binding var sleepTime: Date
     @State private var showGuidedAccessSheet: Bool = false
-    @State private var guidedAccessModel = guidedAccessEnabled()
+    @StateObject var permissionModel = PermissionModel()
     var body: some View {
         VStack(spacing: 28) {
             Spacer()
                 .frame(height: 40)
+            VisionView()
+            MicrophoneView()
             
             Text("Sleep Time")
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundStyle(.red)
             
             Button {
-                handleWakeUp()
+                let calendar = Calendar.current
+                
+                let sleepC = calendar.dateComponents([.hour, .minute], from: sleepTime)
+                let wakeC = calendar.dateComponents([.hour, .minute], from: Date.now)
+                
+                let sleepMinutes = (sleepC.hour ?? 0) * 60 + (sleepC.minute ?? 0)
+                var wakeMinutes = (wakeC.hour ?? 0) * 60 + (wakeC.minute ?? 0)
+                
+                if wakeMinutes <= sleepMinutes { wakeMinutes += 24 * 60 }
+                
+                let minutesSlept = wakeMinutes - sleepMinutes
+                let hours = Double(minutesSlept) / 60.0
+                
+                let entry = sleepDurationStruct(date: .now, duration: hours)
+                context.insert(entry)
+                
+                do { try context.save() } catch { print(error) }
+                
+                withAnimation { showSleepView = false }
             }label: {
                 Text("Wake Up Now")
                     .font(.headline)
@@ -39,17 +61,35 @@ struct SleepView: View {
             }
             .glassEffect(in: RoundedRectangle(cornerRadius: 22))
             .padding(.top, 4)
-            
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(guidedAccessModel.enabled ? .green : .red)
-                    .frame(width: 12, height: 12)
-                
-                Text("Guided Access: \(guidedAccessModel.enabled ? "On" : "Off")")
-                    .foregroundStyle(.secondary)
-                    .font(.subheadline)
+            VStack(alignment: .leading) {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(permissionModel.guidedAccess ? .green : .red)
+                        .frame(width: 12, height: 12)
+                    
+                    Text("Guided Access: \(permissionModel.guidedAccess ? "On" : "Off")")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                }
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(permissionModel.microphone ? .green : .red)
+                        .frame(width: 12, height: 12)
+                    
+                    Text("Microphone: \(permissionModel.microphone ? "On" : "Off")")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                }
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(permissionModel.camera ? .green : .red)
+                        .frame(width: 12, height: 12)
+                    
+                    Text("Camera: \(permissionModel.camera ? "On" : "Off")")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                }
             }
-            
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "lightbulb.fill")
@@ -71,28 +111,6 @@ struct SleepView: View {
         .padding(.bottom, 30)
         .preferredColorScheme(.dark)
     }
-    
-    private func handleWakeUp() {
-        let calendar = Calendar.current
-        
-        let sleepC = calendar.dateComponents([.hour, .minute], from: sleepTime)
-        let wakeC = calendar.dateComponents([.hour, .minute], from: Date.now)
-        
-        let sleepMinutes = (sleepC.hour ?? 0) * 60 + (sleepC.minute ?? 0)
-        var wakeMinutes = (wakeC.hour ?? 0) * 60 + (wakeC.minute ?? 0)
-        
-        if wakeMinutes <= sleepMinutes { wakeMinutes += 24 * 60 }
-        
-        let minutesSlept = wakeMinutes - sleepMinutes
-        let hours = Double(minutesSlept) / 60.0
-        
-        let entry = sleepDurationStruct(date: .now, duration: hours)
-        context.insert(entry)
-        
-        do { try context.save() } catch { print(error) }
-        
-        withAnimation { showSleepView = false }
-    }
 }
 
 
@@ -100,7 +118,70 @@ struct SleepView: View {
     SleepView(showSleepView: .constant(false), sleepTime: .constant(Date.now))
 }
 
-@Observable
-class guidedAccessEnabled {
-    var enabled: Bool = UIAccessibility.isGuidedAccessEnabled
+class PermissionModel: ObservableObject {
+    @Published var guidedAccess: Bool = UIAccessibility.isGuidedAccessEnabled
+    @Published var microphone: Bool = false
+    @Published var camera: Bool = false
+    
+    private let cameraModel = CameraViewModel()
+    
+    private var guidedAccessObserver: NSObjectProtocol?
+    private var microphoneTimer: Timer?
+    private var cameraTimer: Timer?
+    
+    init() {
+        startGuidedAccessMonitoring()
+        startMicrophoneMonitoring()
+        startCameraMonitoring()
+    }
+    
+    deinit {
+        microphoneTimer?.invalidate()
+        cameraTimer?.invalidate()
+        if let observer = guidedAccessObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
+    
+    
+    private func startGuidedAccessMonitoring() {
+        guidedAccessObserver = NotificationCenter.default.addObserver(
+            forName: UIAccessibility.guidedAccessStatusDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.guidedAccess = UIAccessibility.isGuidedAccessEnabled
+        }
+    }
+    
+    
+    
+    private func startMicrophoneMonitoring() {
+        microphoneTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            
+            switch AVAudioSession.sharedInstance().recordPermission {
+            case .granted:
+                self.microphone = true
+            default:
+                self.microphone = false
+            }
+        }
+    }
+    private func startCameraMonitoring() {
+        cameraTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            guard let self else { return }
+
+            let status = AVCaptureDevice.authorizationStatus(for: .video)
+
+            switch status {
+            case .authorized:
+                self.camera = true
+            default:
+                self.camera = false
+            }
+        }
+    }
 }
+
