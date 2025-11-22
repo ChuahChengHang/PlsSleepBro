@@ -14,6 +14,7 @@ struct SleepView: View {
     @Binding var showSleepView: Bool
     @Binding var sleepTime: Date
     @State private var showGuidedAccessSheet: Bool = false
+    @State private var guidedAccessModel = guidedAccessEnabled()
     var body: some View {
         VStack {
             VisionView()
@@ -21,12 +22,6 @@ struct SleepView: View {
             Text("Sleep Time")
                 .foregroundStyle(.red)
                 .font(.largeTitle)
-            Button {
-                showGuidedAccessSheet = true
-            }label: {
-                Text("Guided Access")
-                    .padding()
-            }
             Button {
                 let calendar = Calendar.current
 
@@ -65,12 +60,16 @@ struct SleepView: View {
                             .foregroundStyle(.white)
                     )
             }
-            Text("Tip:")
-                .bold()
-            Text("Enable guided access so we can track the light and noise data when you're sleeping.")
-                .padding()
-            Text("Keep your back camera facing up so we can track the light.")
-                .padding()
+            Text("Guided Access Enabled: \(guidedAccessModel.enabled ? "Yes" : "No")")
+            VStack(alignment: .leading) {
+                Text("Tip:")
+                    .bold()
+                    .font(.title2)
+                Text("- Enable guided access so we can track the light and noise data when you're sleeping.")
+                Text("- Only start a guided access session after you have allowed permissions for camera and microphone usage.")
+                Text("- Keep your back camera facing up so we can track the light.")
+            }
+            .padding()
         }
         .preferredColorScheme(.dark)
     }
@@ -78,4 +77,9 @@ struct SleepView: View {
 
 #Preview {
     SleepView(showSleepView: .constant(false), sleepTime: .constant(Date.now))
+}
+
+@Observable
+class guidedAccessEnabled {
+    var enabled: Bool = UIAccessibility.isGuidedAccessEnabled
 }

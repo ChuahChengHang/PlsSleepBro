@@ -4,6 +4,7 @@ struct GuidedAccessSheet: View {
     @State private var guidedAccess = UIAccessibility.isGuidedAccessEnabled
     @Binding var hasSeenSheet: Bool
     @Environment(\.dismiss) var dismiss
+    @State private var guidedAccessEnable = guidedAccessEnabled()
     var body: some View {
         VStack {
             Spacer()
@@ -26,7 +27,7 @@ struct GuidedAccessSheet: View {
                     
                     Text("""
 Settings → Accessibility → Guided Access  
-Then turn it ON and set a passcode.
+Then turn it ON.
 """)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -54,7 +55,8 @@ Then turn it ON and set a passcode.
             }else if guidedAccess{
                 Text("""
                      Our App uses Guided Access to prevents the screen from turning off and avoids
-                         accidental taps.
+                        accidental taps. Only start a guided access
+                     session after you press the 'sleep now' button
                      """)
                 .multilineTextAlignment(.center)
                 .padding(.top)
@@ -86,11 +88,11 @@ Then turn it ON and set a passcode.
                 for: UIAccessibility.guidedAccessStatusDidChangeNotification
             )
         ) { _ in
-            guidedAccess = UIAccessibility.isGuidedAccessEnabled
+            guidedAccess = guidedAccessEnable.enabled
         }
         
         .onAppear {
-            guidedAccess = UIAccessibility.isGuidedAccessEnabled
+            guidedAccess = guidedAccessEnable.enabled
         }
         
         .padding()
