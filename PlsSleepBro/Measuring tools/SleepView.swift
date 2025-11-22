@@ -16,64 +16,85 @@ struct SleepView: View {
     @State private var showGuidedAccessSheet: Bool = false
     @State private var guidedAccessModel = guidedAccessEnabled()
     var body: some View {
-        VStack {
-            VisionView()
-            MicrophoneView()
+        VStack(spacing: 28) {
+            Spacer()
+                .frame(height: 40)
+            
             Text("Sleep Time")
+                .font(.system(size: 34, weight: .semibold))
                 .foregroundStyle(.red)
-                .font(.largeTitle)
+            
             Button {
-                let calendar = Calendar.current
-
-                let sleepComponents = calendar.dateComponents([.hour, .minute], from: sleepTime)
-                let wakeComponents = calendar.dateComponents([.hour, .minute], from: Date.now)
-
-                let sleepMinutes = (sleepComponents.hour ?? 0) * 60 + (sleepComponents.minute ?? 0)
-                var wakeMinutes = (wakeComponents.hour ?? 0) * 60 + (wakeComponents.minute ?? 0)
-
-                if wakeMinutes <= sleepMinutes {
-                    wakeMinutes += 24 * 60
-                }
-
-                let minutesSlept = wakeMinutes - sleepMinutes
-                let totalHours = Double(minutesSlept) / 60.0
-
-                let entry = sleepDurationStruct(date: Date.now, duration: totalHours)
-                context.insert(entry)
-
-                do {
-                    print(entry)
-                    try context.save()
-                    print("Saved duration:", totalHours)
-                } catch {
-                    print("Failed to save duration:", error)
-                }
-                withAnimation {
-                    showSleepView = false
-                }
+                handleWakeUp()
             }label: {
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(.red)
-                    .frame(width: 200, height: 70)
-                    .overlay(
-                        Text("Wake Up Now")
-                            .foregroundStyle(.white)
+                Text("Wake Up Now")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(width: 200, height: 55)
+                    .background(
+                        RoundedRectangle(cornerRadius: 22)
+                            .fill(.red)
+                            .shadow(radius: 8, y: 4)
                     )
             }
-            Text("Guided Access Enabled: \(guidedAccessModel.enabled ? "Yes" : "No")")
-            VStack(alignment: .leading) {
-                Text("Tip:")
-                    .bold()
-                    .font(.title2)
-                Text("- Enable guided access so we can track the light and noise data when you're sleeping.")
-                Text("- Only start a guided access session after you have allowed permissions for camera and microphone usage.")
-                Text("- Keep your back camera facing up so we can track the light.")
+            .glassEffect(in: RoundedRectangle(cornerRadius: 22))
+            .padding(.top, 4)
+            
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(guidedAccessModel.enabled ? .green : .red)
+                    .frame(width: 12, height: 12)
+                
+                Text("Guided Access: \(guidedAccessModel.enabled ? "On" : "Off")")
+                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundStyle(.yellow)
+                    Text("Tips for Sleeping")
+                        .font(.title3.bold())
+                }
+                
+                Text("- Enable guided access so we can track light and noise data during sleep.")
+                Text("- Make sure camera + microphone permissions are granted before starting.")
+                Text("- Keep your back camera facing upward for accurate light tracking.")
             }
             .padding()
+            .background(.white.opacity(0.09))
+            .cornerRadius(16)
+            .padding(.horizontal)
         }
         .preferredColorScheme(.dark)
+        .padding(.bottom, 30)
+        .preferredColorScheme(.dark)
+    }
+    
+    private func handleWakeUp() {
+        let calendar = Calendar.current
+        
+        let sleepC = calendar.dateComponents([.hour, .minute], from: sleepTime)
+        let wakeC = calendar.dateComponents([.hour, .minute], from: Date.now)
+        
+        let sleepMinutes = (sleepC.hour ?? 0) * 60 + (sleepC.minute ?? 0)
+        var wakeMinutes = (wakeC.hour ?? 0) * 60 + (wakeC.minute ?? 0)
+        
+        if wakeMinutes <= sleepMinutes { wakeMinutes += 24 * 60 }
+        
+        let minutesSlept = wakeMinutes - sleepMinutes
+        let hours = Double(minutesSlept) / 60.0
+        
+        let entry = sleepDurationStruct(date: .now, duration: hours)
+        context.insert(entry)
+        
+        do { try context.save() } catch { print(error) }
+        
+        withAnimation { showSleepView = false }
     }
 }
+
 
 #Preview {
     SleepView(showSleepView: .constant(false), sleepTime: .constant(Date.now))

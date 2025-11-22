@@ -61,20 +61,24 @@ struct NoiseChartView: View {
                     .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
                     .foregroundStyle(.yellow)
                     .annotation(position: .bottom) {
-                        Text("avg").foregroundStyle(.yellow)
+                        Text("Avg").foregroundStyle(.yellow)
                     }
                 
                 RectangleMark(yStart: .value("Recommended", 0), yEnd: .value("Recommended", 30))
                     .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
                     .foregroundStyle(linearGradient)
                     .annotation(position: .top) {
-                        Text("recommended").foregroundStyle(.green)
+                        Text("Recommended").foregroundStyle(.green)
                     }
             }
             .chartXAxis {
                 AxisMarks(preset: .aligned, values: hourlyData.map { $0.time }) { value in
                     if let time = value.as(Date.self) {
-                        AxisValueLabel(time.formatted(.dateTime.hour()))
+                        AxisValueLabel(time.formatted(
+                            .dateTime
+                            .locale(.init(identifier: "en_UK"))
+                            .hour(.twoDigits(amPM: .omitted))
+                        ))
                     }
                 }
             }
