@@ -17,7 +17,7 @@ struct LightView: View {
         NavigationStack {
             ScrollView {
                 VStack {
-                    DatePicker("", selection: $selectedDate, displayedComponents: [.date])
+                    DatePicker("", selection: $selectedDate, in: ...Date(), displayedComponents: [.date])
                         .datePickerStyle(.compact)
                         .offset(x: -140)
                         .sensoryFeedback(.impact(weight: .light), trigger: selectedDate)
@@ -27,15 +27,17 @@ struct LightView: View {
                         .overlay(
                             LightChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion)
                         )
+                        .padding(.horizontal)
                 }
                 VStack {
                     HStack {
                         Text("Suggestions")
                             .font(.title)
                             .bold()
-                            .padding()
+                            .padding(.horizontal, 5)
                         Spacer()
                     }
+                    .padding()
                     if lightData.isEmpty {
                         RoundedRectangle(cornerRadius: 18)
                             .fill(.quaternary)
@@ -45,6 +47,7 @@ struct LightView: View {
                                     .font(.largeTitle)
                                     .bold()
                             )
+                            .padding(.horizontal)
                     }else {
                         LazyVStack(spacing: 0) {
                             ForEach(suggestion, id: \.self) { suggestion in
@@ -56,6 +59,7 @@ struct LightView: View {
                                 .background(Color(UIColor.systemBackground))
                             }
                         }
+                        .padding(.horizontal, 6)
                     }
                     Spacer()
                 }

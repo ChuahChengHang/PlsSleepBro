@@ -31,13 +31,15 @@ struct SleepView: View {
             Button {
                 let calendar = Calendar.current
                 
-                let sleepC = calendar.dateComponents([.hour, .minute], from: sleepTime)
-                let wakeC = calendar.dateComponents([.hour, .minute], from: Date.now)
+                let sleepComponents = calendar.dateComponents([.day, .hour, .minute], from: sleepTime)
+                let wakeComponents = calendar.dateComponents([.day, .hour, .minute], from: Date())
                 
-                let sleepMinutes = (sleepC.hour ?? 0) * 60 + (sleepC.minute ?? 0)
-                var wakeMinutes = (wakeC.hour ?? 0) * 60 + (wakeC.minute ?? 0)
+                var wakeMinutes = wakeComponents.hour! * 60 + wakeComponents.minute!
+                var sleepMinutes = sleepComponents.hour! * 60 + sleepComponents.minute!
                 
-                if wakeMinutes <= sleepMinutes { wakeMinutes += 24 * 60 }
+                if wakeComponents.day! > sleepComponents.day! {
+                    wakeMinutes = ((wakeComponents.hour! + 24) * 60) + wakeComponents.minute!
+                }
                 
                 let minutesSlept = wakeMinutes - sleepMinutes
                 let hours = Double(minutesSlept) / 60.0
@@ -45,7 +47,12 @@ struct SleepView: View {
                 let entry = sleepDurationStruct(date: .now, duration: hours)
                 context.insert(entry)
                 
-                do { try context.save() } catch { print(error) }
+                do {
+                    try context.save()
+                    print("Hours: \(entry.duration)")
+                } catch {
+                    print(error)
+                }
                 
                 withAnimation { showSleepView = false }
             }label: {

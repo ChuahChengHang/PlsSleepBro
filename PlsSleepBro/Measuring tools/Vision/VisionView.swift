@@ -56,11 +56,11 @@ struct VisionView: View {
                 }
                 .task {
                     Task {
-                        let lux = luminance * 10
+                        let lux = luminance * 100
                         let entry = lightStruct(date: Date.now, light: lux)
                         context.insert(entry)
                         do {
-                            print(lux)
+                            print("light: \(lux)")
                             try context.save()
                         }catch {
                             print("error: \(error.localizedDescription)")

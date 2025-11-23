@@ -18,7 +18,7 @@ struct NoiseView: View {
         NavigationStack {
             ScrollView {
                 VStack {
-                    DatePicker("", selection: $selectedDate, displayedComponents: [.date])
+                    DatePicker("", selection: $selectedDate, in: ...Date(), displayedComponents: [.date])
                         .datePickerStyle(.compact)
                         .offset(x: -140)
                         .sensoryFeedback(.impact(weight: .light), trigger: selectedDate)
@@ -28,10 +28,12 @@ struct NoiseView: View {
                         .overlay(
                             NoiseChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion)
                         )
+                        .padding(.horizontal)
                     HStack {
                         Text("Suggestions")
                             .font(.title)
                             .bold()
+                            .padding(.horizontal, 5)
                         Spacer()
                     }
                     .padding()
@@ -44,6 +46,7 @@ struct NoiseView: View {
                                     .font(.largeTitle)
                                     .bold()
                             )
+                            .padding(.horizontal)
                     }else {
                         LazyVStack(spacing: 0) {
                             ForEach(suggestion, id: \.self) { suggestion in
@@ -55,6 +58,7 @@ struct NoiseView: View {
                                 .background(Color(UIColor.systemBackground))
                             }
                         }
+                        .padding(.horizontal, 6)
                     }
                 }
             }

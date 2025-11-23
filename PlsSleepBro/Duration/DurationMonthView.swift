@@ -61,6 +61,12 @@ struct DurationMonthView: View {
                         .foregroundStyle(.green)
                         .annotation(position: .bottom) { Text("recommended").foregroundColor(.green) }
                 }
+                .chartPlotStyle { area in
+                    area
+                        .padding(.leading, 10)
+                        .padding(.trailing, 10)
+                }
+                .chartScrollableAxes(.horizontal)
                 .chartXScale(domain: weeklyData.first!.weekStart...weeklyData.last!.weekStart)
                 .chartXAxis {
                     AxisMarks(preset: .aligned, values: weeklyData.map { $0.weekStart }) { value in
@@ -69,27 +75,39 @@ struct DurationMonthView: View {
                         }
                     }
                 }
+                .padding(.bottom, 40)
                 .aspectRatio(1, contentMode: .fit)
                 .padding()
-                .gesture(
-                    DragGesture()
-                        .onEnded { gesture in
-                            if gesture.translation.width < -50 {
-                                withAnimation { weekOffset += 1 }
-                            }
-                            if gesture.translation.width > 50 {
-                                withAnimation { weekOffset -= 1 }
-                            }
-                        }
+                .overlay(
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("X-Axis: Week Number")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("Y-Axis: Total Hours Slept")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                        .padding(), alignment: .bottom
                 )
-                .sensoryFeedback(.increase, trigger: weekOffset)
-                .sensoryFeedback(.decrease, trigger: weekOffset)
+//                .gesture(
+//                    DragGesture()
+//                        .onEnded { gesture in
+//                            if gesture.translation.width < -50 {
+//                                withAnimation { weekOffset += 1 }
+//                            }
+//                            if gesture.translation.width > 50 {
+//                                withAnimation { weekOffset -= 1 }
+//                            }
+//                        }
+//                )
+//                .sensoryFeedback(.increase, trigger: weekOffset)
+//                .sensoryFeedback(.decrease, trigger: weekOffset)
                 .onAppear { weeklyAverage = averageDuration }
                 .onChange(of: startOfWeek) {
                     weeklyAverage = averageDuration
                 }
             } else {
-                Text("No data available")
+                Text("No Data Available")
             }
         }
         .preferredColorScheme(.dark)

@@ -72,6 +72,12 @@ struct SixMonthsView: View {
                             Text("recommended").foregroundStyle(.green)
                         }
                 }
+                .chartPlotStyle { area in
+                    area
+                        .padding(.leading, 10)
+                        .padding(.trailing, 10)
+                }
+                .chartScrollableAxes(.horizontal)
                 .chartXScale(domain: firstMonth...lastMonth)
                 .chartXAxis {
                     AxisMarks(preset: .aligned, values: monthStartDates) { value in
@@ -82,30 +88,42 @@ struct SixMonthsView: View {
                         }
                     }
                 }
+                .padding(.bottom, 40)
                 .padding()
-                .animation(.easeInOut, value: offset)
+                .overlay(
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("X-Axis: Month")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("Y-Axis: Total Hours Slept")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                        .padding(), alignment: .bottom
+                )
+//                .animation(.easeInOut, value: offset)
                 .onAppear {
                     average = averageDuration
                 }
                 .onChange(of: startOfSelectedPeriod) {
                     average = averageDuration
                 }
-                .gesture(
-                    DragGesture()
-                        .updating($dragOffset) { value, state, _ in
-                            state = value.translation.width
-                        }
-                        .onEnded { value in
-                            let threshold: CGFloat = 80
-                            if value.translation.width < -threshold {
-                                offset += 1
-                            } else if value.translation.width > threshold {
-                                offset -= 1
-                            }
-                        }
-                )
-                .sensoryFeedback(.increase, trigger: offset)
-                .sensoryFeedback(.decrease, trigger: offset)
+//                .gesture(
+//                    DragGesture()
+//                        .updating($dragOffset) { value, state, _ in
+//                            state = value.translation.width
+//                        }
+//                        .onEnded { value in
+//                            let threshold: CGFloat = 80
+//                            if value.translation.width < -threshold {
+//                                offset += 1
+//                            } else if value.translation.width > threshold {
+//                                offset -= 1
+//                            }
+//                        }
+//                )
+//                .sensoryFeedback(.increase, trigger: offset)
+//                .sensoryFeedback(.decrease, trigger: offset)
             } else {
                 Text("No Data Available")
             }

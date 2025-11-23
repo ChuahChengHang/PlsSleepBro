@@ -25,20 +25,12 @@ struct ContentView: View {
     @State private var noiseFilledBlocks: Int = 0
     @State private var lightFilledBlocks: Int = 0
     @AppStorage("sleepTime") private var sleepTime: Date = Date.now
-    @State private var sleeptip: String = ""
-    @State private var lighttip: String = ""
-    @State private var noisetip: String = ""
     @AppStorage("showSleepView") private var showSleepView: Bool = false
-    
     var body: some View {
         if !showSleepView {
             NavigationStack {
                 ScrollView {
-                    if !durationData.isEmpty && !lightData.isEmpty && !noiseData.isEmpty {
-                        if !sleeptip.isEmpty && !lighttip.isEmpty && !noisetip.isEmpty {
-                            TipsView(sleeptip: $sleeptip, lighttip: $lighttip, noisetip: $noisetip)
-                        }
-                    }
+                    TipsView()
                     Button {
                         sleepTime = Date.now
                         withAnimation { showSleepView = true }
@@ -54,6 +46,7 @@ struct ContentView: View {
                             )
                     }
                     .glassEffect(in: RoundedRectangle(cornerRadius: 40))
+                    .padding(2)
                     NavigationLink {
                         DurationView()
                     } label: {
@@ -88,6 +81,7 @@ struct ContentView: View {
                     }
                     .foregroundColor(Color.gray.opacity(0.2))
                     .glassEffect(in: RoundedRectangle(cornerRadius: 14))
+                    .padding(.horizontal)
                     NavigationLink {
                         LightView()
                     } label: {
@@ -108,28 +102,53 @@ struct ContentView: View {
                                             Image(systemName: "lightbulb.fill")
                                                 .resizable()
                                                 .frame(width: 34, height: 55)
-                                                .foregroundStyle(.white)
+                                                .foregroundStyle(.yellow)
                                             ForEach(0..<10) { index in
-                                                Rectangle()
-                                                    .frame(width: 14, height: 40)
-                                                    .foregroundStyle(index < lightFilledBlocks ? Color.yellow : Color.clear)
-                                                    .overlay(
+                                                if index == 3{
+                                                    HStack {
+                                                        VStack {
+                                                            Rectangle()
+                                                                .frame(width: 2, height: 90)
+                                                                .foregroundStyle(Color.green)
+                                                            Text("Ideal")
+                                                                .font(.caption)
+                                                                .foregroundColor(.green)
+                                                        }
                                                         Rectangle()
-                                                            .stroke(Color.primary, lineWidth: 2)
-                                                    )
-                                                    .clipShape(RoundedRectangle(cornerRadius: 3))
+                                                            .frame(width: 14, height: 40)
+                                                            .foregroundStyle(index < noiseFilledBlocks ? Color.white : Color.clear)
+                                                            .overlay(
+                                                                Rectangle()
+                                                                    .stroke(Color.primary, lineWidth: 2)
+                                                            )
+                                                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                                                    }
+                                                }else {
+                                                    Rectangle()
+                                                        .frame(width: 14, height: 40)
+                                                        .foregroundStyle(index < lightFilledBlocks ? Color.yellow : Color.clear)
+                                                        .overlay(
+                                                            Rectangle()
+                                                                .stroke(Color.primary, lineWidth: 2)
+                                                        )
+                                                        .clipShape(RoundedRectangle(cornerRadius: 3))
+                                                }
                                             }
                                         }
                                     }
                                     Spacer()
                                 }
                             )
-                            .foregroundColor(Color.gray.opacity(0.2))
-                            .glassEffect(in: RoundedRectangle(cornerRadius: 14))
                     }
+                    .foregroundColor(Color.gray.opacity(0.2))
+                    .glassEffect(in: RoundedRectangle(cornerRadius: 14))
+                    .padding(.horizontal)
+                    .padding(2)
                     NavigationLink {
                         NoiseView()
                     } label: {
+                        let idealNoiseBlocks = 3
+                        
                         RoundedRectangle(cornerRadius: 14)
                             .frame(width: 380, height: 200)
                             .overlay(
@@ -149,14 +168,35 @@ struct ContentView: View {
                                                 .frame(width: 34, height: 40)
                                                 .foregroundStyle(.white)
                                             ForEach(0..<10) { index in
-                                                Rectangle()
-                                                    .frame(width: 14, height: 40)
-                                                    .foregroundStyle(index < noiseFilledBlocks ? Color.white : Color.clear)
-                                                    .overlay(
+                                                if index == 3{
+                                                    HStack {
+                                                        VStack {
+                                                            Rectangle()
+                                                                .frame(width: 2, height: 90)
+                                                                .foregroundStyle(Color.green)
+                                                            Text("Ideal")
+                                                                .font(.caption)
+                                                                .foregroundColor(.green)
+                                                        }
                                                         Rectangle()
-                                                            .stroke(Color.primary, lineWidth: 2)
-                                                    )
-                                                    .clipShape(RoundedRectangle(cornerRadius: 3))
+                                                            .frame(width: 14, height: 40)
+                                                            .foregroundStyle(index < noiseFilledBlocks ? Color.white : Color.clear)
+                                                            .overlay(
+                                                                Rectangle()
+                                                                    .stroke(Color.primary, lineWidth: 2)
+                                                            )
+                                                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                                                    }
+                                                }else {
+                                                    Rectangle()
+                                                        .frame(width: 14, height: 40)
+                                                        .foregroundStyle(index < noiseFilledBlocks ? Color.white : Color.clear)
+                                                        .overlay(
+                                                            Rectangle()
+                                                                .stroke(Color.primary, lineWidth: 2)
+                                                        )
+                                                        .clipShape(RoundedRectangle(cornerRadius: 3))
+                                                }
                                             }
                                         }
                                     }
@@ -166,13 +206,13 @@ struct ContentView: View {
                     }
                     .foregroundColor(Color.gray.opacity(0.2))
                     .glassEffect(in: RoundedRectangle(cornerRadius: 14))
-                    .navigationTitle("Home")
+                    .padding(.horizontal)
                 }
+                .navigationTitle("Home")
                 .preferredColorScheme(.dark)
                 .scrollIndicators(.hidden)
                 .onAppear {
                     updateDurationRing()
-                    updateTips()
                     updateLightRing()
                     updateNoiseRing()
                     if !hasSeenSheet { showSheet = true }
@@ -192,7 +232,9 @@ struct ContentView: View {
                 }
             }
         } else {
-            SleepView(showSleepView: $showSleepView, sleepTime: $sleepTime)
+            withAnimation {
+                SleepView(showSleepView: $showSleepView, sleepTime: $sleepTime)
+            }
         }
     }
     
@@ -239,34 +281,6 @@ struct ContentView: View {
         let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
         let clampedNoise = min(max(totalNoise, 0), 100)
         noiseFilledBlocks = Int((clampedNoise / 100 * 10).rounded())
-    }
-    
-    func updateTips() {
-        let today = Date()
-        let duration = durationData.filter {
-            Calendar.current.isDate($0.date, equalTo: today, toGranularity: .day)
-        }.map { $0.duration }.reduce(0, +)
-        let light = lightData.filter {
-            Calendar.current.isDate($0.date, equalTo: today, toGranularity: .day)
-        }.map { $0.light }.reduce(0, +)
-        let noise = noiseData.filter {
-            Calendar.current.isDate($0.date, equalTo: today, toGranularity: .day)
-        }.map { $0.noise }.reduce(0, +)
-        if duration > 10 { sleeptip = "Too much sleep 😴" }
-        else if duration >= 8 { sleeptip = "Great amount of sleep! 👍" }
-        else { sleeptip = "Try to sleep a bit more 😪" }
-        switch light {
-        case ...10: lighttip = "Perfect darkness level 🌙"
-        case ...40: lighttip = "Slightly bright room, still okay 🫤"
-        case ...80: lighttip = "A bit bright, try dimming 💡"
-        default: lighttip = "Too much light! Can harm sleep 😵‍💫"
-        }
-        switch noise {
-        case ...30: noisetip = "Very quiet environment 😌"
-        case ...40: noisetip = "Some noise detected, acceptable 🤨"
-        case ...55: noisetip = "Noise might disturb sleep 🫨"
-        default: noisetip = "Very loud! Reduce noise ⚠️"
-        }
     }
 }
 

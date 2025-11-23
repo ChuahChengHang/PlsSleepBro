@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Charts
 import SwiftData
 
 enum timeScale: String, CaseIterable {
@@ -42,9 +41,10 @@ struct DurationView: View {
                     .sensoryFeedback(.impact(weight: .light), trigger: selectedTimeScale)
                     .pickerStyle(.segmented)
 
-                    if selectedTimeScale == .week {
-                        HStack {
-                            VStack {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 0) {
+                            switch selectedTimeScale {
+                            case .week:
                                 Text("DAILY AVERAGE")
                                     .foregroundStyle(.gray)
                                     .bold()
@@ -52,15 +52,7 @@ struct DurationView: View {
                                     .foregroundStyle(.red)
                                     .font(.title)
                                     .bold()
-                                Text(dateText)
-                                    .foregroundStyle(.gray)
-                                    .bold()
-                            }
-                            Spacer()
-                        }
-                    } else if selectedTimeScale == .month {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 0) {
+                            case .month:
                                 Text("WEEKLY AVERAGE")
                                     .foregroundStyle(.gray)
                                     .bold()
@@ -68,15 +60,7 @@ struct DurationView: View {
                                     .foregroundStyle(.red)
                                     .font(.title)
                                     .bold()
-                                Text(dateText)
-                                    .foregroundStyle(.gray)
-                                    .bold()
-                            }
-                            Spacer()
-                        }
-                    } else if selectedTimeScale == .sixmonths {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 0) {
+                            case .sixmonths:
                                 Text("MONTHLY AVERAGE")
                                     .foregroundStyle(.gray)
                                     .bold()
@@ -84,15 +68,7 @@ struct DurationView: View {
                                     .foregroundStyle(.red)
                                     .font(.title)
                                     .bold()
-                                Text(dateText)
-                                    .foregroundStyle(.gray)
-                                    .bold()
-                            }
-                            Spacer()
-                        }
-                    } else {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 0) {
+                            case .year:
                                 Text("MONTHLY AVERAGE")
                                     .foregroundStyle(.gray)
                                     .bold()
@@ -100,13 +76,14 @@ struct DurationView: View {
                                     .foregroundStyle(.red)
                                     .font(.title)
                                     .bold()
-                                Text(dateText)
-                                    .foregroundStyle(.gray)
-                                    .bold()
                             }
-                            Spacer()
+                            Text(dateText)
+                                .foregroundStyle(.gray)
+                                .bold()
                         }
+                        Spacer()
                     }
+                    .padding(.horizontal, 6)
                 }
                 .padding()
 
@@ -116,13 +93,14 @@ struct DurationView: View {
                     .overlay(
                         VStack {
                             if !durationData.isEmpty {
-                                if selectedTimeScale == .week {
+                                switch selectedTimeScale {
+                                case .week:
                                     DurationWeekView(dailyAverage: $dailyAverage, weekOffset: $weekOffset)
-                                } else if selectedTimeScale == .month {
+                                case .month:
                                     DurationMonthView(weeklyAverage: $weeklyAverage, weekOffset: $monthOffset)
-                                } else if selectedTimeScale == .sixmonths {
+                                case .sixmonths:
                                     SixMonthsView(average: $sixMonthlyAverage, offset: $sixMonthOffset)
-                                } else {
+                                case .year:
                                     DurationYearView(average: $monthlyAverage, offset: $yearOffset)
                                 }
                             } else {
@@ -134,143 +112,51 @@ struct DurationView: View {
                         }
                     )
                     .glassEffect(in: RoundedRectangle(cornerRadius: 18))
-
+                    .padding(.horizontal)
                 ZStack {
                     ActivityRingView(progress: $progress)
                     VStack {
-                        if selectedTimeScale == .week {
-                            Text("TODAY")
-                                .foregroundStyle(.gray)
-                                .font(.title)
-                            Text("\(String(format: "%.1f", hoursSlept))h / 10h")
-                                .font(.largeTitle)
-                        } else if selectedTimeScale == .month {
+                        switch selectedTimeScale {
+                        case .week:
                             Text("THIS WEEK")
                                 .foregroundStyle(.gray)
                                 .font(.title)
                             Text("\(String(format: "%.1f", hoursSlept))h / 70h")
                                 .font(.largeTitle)
-                        } else if selectedTimeScale == .sixmonths {
+                        case .month:
                             Text("THIS MONTH")
                                 .foregroundStyle(.gray)
                                 .font(.title)
-                            Text("\(String(format: "%.1f", hoursSlept))h / 280h")
+                            Text("\(String(format: "%.1f", hoursSlept))h / 300h")
                                 .font(.largeTitle)
-                        } else {
-                            Text("THIS MONTH")
+                        case .sixmonths:
+                            Text("LAST 6 MONTHS")
                                 .foregroundStyle(.gray)
                                 .font(.title)
-                            Text("\(String(format: "%.1f", hoursSlept))h / 280h")
+                            Text("\(String(format: "%.1f", hoursSlept))h / 1825h")
+                                .font(.largeTitle)
+                        case .year:
+                            Text("THIS YEAR")
+                                .foregroundStyle(.gray)
+                                .font(.title)
+                            Text("\(String(format: "%.1f", hoursSlept))h / 3650h")
                                 .font(.largeTitle)
                         }
-                        Text(progress * 100.0 == 0 ? "0%" : "\(Int(progress * 100.0))%")
+                        Text(progress * 100 == 0 ? "0%" : "\(Int(progress * 100))%")
                             .foregroundStyle(.white)
                             .font(.subheadline)
                             .bold()
                     }
                 }
                 .padding()
-                .onAppear {
-                    updateHoursSlept()
-                }
+                .onAppear { updateHoursSlept() }
                 .onChange(of: durationData) {
                     updateHoursSlept()
                 }
                 .onChange(of: selectedTimeScale) {
                     updateHoursSlept()
                 }
-                .onChange(of: weekOffset) {
-                    let calendar = Calendar.current
-                    let today = Date()
-                    let startOfCurrentWeek = calendar.date(
-                        from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
-                    )!
-                    
-                    let startOfWeek = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: startOfCurrentWeek)!
-                    let startDate = calendar.date(
-                        byAdding: .weekOfYear,
-                        value: -3,
-                        to: startOfWeek
-                    )!
-                    let endDate = calendar.date(
-                        byAdding: .day,
-                        value: 27,
-                        to: startDate
-                    )!
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "d MMM"
-                    dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
-                }
-                .onChange(of: monthOffset) {
-                    let calendar = Calendar.current
-                    let today = Date()
-                    let startOfCurrentWeek = calendar.date(
-                        from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
-                    )!
-                    
-                    let startOfWeek = calendar.date(byAdding: .weekOfYear, value: monthOffset, to: startOfCurrentWeek)!
-                    let startDate = calendar.date(
-                        byAdding: .weekOfYear,
-                        value: -3,
-                        to: startOfWeek
-                    )!
-                    let endDate = calendar.date(
-                        byAdding: .day,
-                        value: 27,
-                        to: startDate
-                    )!
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "d MMM"
-                    dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
-                }
-                .onChange(of: sixMonthOffset) {
-                    let calendar = Calendar.current
-                    let today = Date()
-                    
-                    let startOfMonth = calendar.date(
-                        from: calendar.dateComponents([.year, .month], from: today)
-                    )!
-                    
-                    let startOfSelectedPeriod = calendar.date(
-                        byAdding: .month,
-                        value: sixMonthOffset * 6,
-                        to: startOfMonth
-                    )!
-                    
-                    let endOfSelectedPeriod = calendar.date(
-                        byAdding: .month,
-                        value: 6,
-                        to: startOfSelectedPeriod
-                    )!
-                    
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "d MMM"
-                    dateText = "\(formatter.string(from: startOfSelectedPeriod)) – \(formatter.string(from: endOfSelectedPeriod))"
-                }
-                .onChange(of: yearOffset) {
-                    let calendar = Calendar.current
-                    let today = Date()
-                    
-                    let startOfYear = calendar.date(
-                        from: calendar.dateComponents([.year], from: today)
-                    )!
-                    
-                    let startOfSelectedPeriod = calendar.date(
-                        byAdding: .year,
-                        value: yearOffset,
-                        to: startOfYear
-                    )!
-                    
-                    let endOfSelectedPeriod = calendar.date(
-                        byAdding: .year,
-                        value: 1,
-                        to: startOfSelectedPeriod
-                    )!
-                    
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "d MMM"
-                    dateText = "\(formatter.string(from: startOfSelectedPeriod)) – \(formatter.string(from: endOfSelectedPeriod))"
-                }
+
                 Spacer()
             }
             .navigationTitle("Sleep Duration")
@@ -287,39 +173,54 @@ struct DurationView: View {
 
         switch selectedTimeScale {
         case .week:
-            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-            startDate = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: startOfWeek)!
+            startDate = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
+            startDate = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: startDate)!
             endDate = calendar.date(byAdding: .day, value: 7, to: startDate)!
-            maxHours = 10
+            maxHours = 24 * 7
+
         case .month:
-            let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-            startDate = calendar.date(byAdding: .month, value: monthOffset, to: startOfMonth)!
+            startDate = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
+            startDate = calendar.date(byAdding: .month, value: monthOffset, to: startDate)!
             endDate = calendar.date(byAdding: .month, value: 1, to: startDate)!
-            maxHours = 70
+            let daysInMonth = calendar.range(of: .day, in: .month, for: startDate)!.count
+            maxHours = Double(daysInMonth * 10)
+
         case .sixmonths:
-            let startOfSixMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-            startDate = calendar.date(byAdding: .month, value: sixMonthOffset * 6, to: startOfSixMonth)!
+            let currentMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
+            startDate = calendar.date(byAdding: .month, value: sixMonthOffset * 6, to: currentMonth)!
             endDate = calendar.date(byAdding: .month, value: 6, to: startDate)!
-            maxHours = 280
+            let days = calendar.dateComponents([.day], from: startDate, to: endDate).day ?? 180
+            maxHours = Double(days * 10)
+
         case .year:
-            let startOfYear = calendar.date(from: calendar.dateComponents([.year], from: today))!
-            startDate = calendar.date(byAdding: .year, value: yearOffset, to: startOfYear)!
+            startDate = calendar.date(from: calendar.dateComponents([.year], from: today))!
+            startDate = calendar.date(byAdding: .year, value: yearOffset, to: startDate)!
             endDate = calendar.date(byAdding: .year, value: 1, to: startDate)!
-            maxHours = 560
+            let days = calendar.dateComponents([.day], from: startDate, to: endDate).day ?? 365
+            maxHours = Double(days * 10)
         }
 
         hoursSlept = durationData
             .filter { $0.date >= startDate && $0.date < endDate }
             .map { $0.duration }
             .reduce(0, +)
-
-        progress = CGFloat(min(hoursSlept / maxHours, 1.0))
         
+        if selectedTimeScale == .week {
+            progress = CGFloat(hoursSlept / 70 / 10)
+        }else if selectedTimeScale == .month {
+            progress = CGFloat(hoursSlept / 300 / 10)
+        }else if selectedTimeScale == .sixmonths {
+            progress = CGFloat(hoursSlept / 1825 / 10)
+        }else {
+            progress = CGFloat(hoursSlept / 3650 / 10)
+        }
+
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM"
-        dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
+        dateText = "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate.addingTimeInterval(-1)))"
     }
 }
+
 
 
 #Preview {

@@ -20,6 +20,7 @@ struct NoiseChartView: View {
     @Binding var suggestions: [String]
     var body: some View {
         VStack {
+            if !noiseData.isEmpty {
             let calendar = Calendar.current
             let selectedDate = calendar.date(byAdding: .day, value: offSet, to: date)!
             
@@ -71,40 +72,59 @@ struct NoiseChartView: View {
                         Text("Recommended").foregroundStyle(.green)
                     }
             }
+            .chartPlotStyle { area in
+                area
+                    .padding(.leading, 10)
+                    .padding(.trailing, 10)
+            }
+            .chartScrollableAxes(.horizontal)
             .chartXAxis {
                 AxisMarks(preset: .aligned, values: hourlyData.map { $0.time }) { value in
                     if let time = value.as(Date.self) {
                         AxisValueLabel(time.formatted(
                             .dateTime
-                            .locale(.init(identifier: "en_UK"))
-                            .hour(.twoDigits(amPM: .omitted))
+                                .locale(.init(identifier: "en_UK"))
+                                .hour(.twoDigits(amPM: .omitted))
                         ))
                     }
                 }
             }
+            .padding(.bottom, 40)
             .aspectRatio(1, contentMode: .fit)
             .padding()
-            .gesture(
-                DragGesture()
-                    .onEnded { gesture in
-                        if gesture.translation.width < -50 {
-                            withAnimation {
-                                halfDayStartHour = halfDayStartHour == 0 ? 12 : 0
-                            }
-                        }
-                        if gesture.translation.width > 50 {
-                            withAnimation {
-                                halfDayStartHour = halfDayStartHour == 12 ? 0 : 12
-                            }
-                        }
-                    }
+            .overlay(
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("X-Axis: Time(Hour)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("Y-Axis: Average Noise Per Hour")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                    .padding(), alignment: .bottom
             )
-            .sensoryFeedback(.increase, trigger: halfDayStartHour)
-            .sensoryFeedback(.decrease, trigger: halfDayStartHour)
+            //            .gesture(
+            //                DragGesture()
+            //                    .onEnded { gesture in
+            //                        if gesture.translation.width < -50 {
+            //                            withAnimation {
+            //                                halfDayStartHour = halfDayStartHour == 0 ? 12 : 0
+            //                            }
+            //                        }
+            //                        if gesture.translation.width > 50 {
+            //                            withAnimation {
+            //                                halfDayStartHour = halfDayStartHour == 12 ? 0 : 12
+            //                            }
+            //                        }
+            //                    }
+            //            )
+            //            .sensoryFeedback(.increase, trigger: halfDayStartHour)
+            //            .sensoryFeedback(.decrease, trigger: halfDayStartHour)
             .onAppear {
                 if suggestions.isEmpty {
                     if averageNoise == 0 {
                         suggestions.append("No noise data recorded for this period.")
+                        return
                     } else if averageNoise > 60 {
                         suggestions.append("Your environment was very noisy. Consider using earplugs, closing windows, or reducing nearby activity.")
                     } else if averageNoise > 30 {
@@ -123,6 +143,7 @@ struct NoiseChartView: View {
                 if suggestions.isEmpty {
                     if averageNoise == 0 {
                         suggestions.append("No noise data recorded for this period.")
+                        return
                     }
                     if averageNoise > 60 {
                         suggestions.append("Your environment was very noisy. Consider using earplugs, closing windows, or reducing nearby activity.")
@@ -139,6 +160,9 @@ struct NoiseChartView: View {
                         suggestions.append("Your noise levels are within a healthy range. Keep maintaining a quiet sleep environment.")
                     }
                 }
+            }
+            }else {
+                Text("No Data Available")
             }
         }
         .preferredColorScheme(.dark)
