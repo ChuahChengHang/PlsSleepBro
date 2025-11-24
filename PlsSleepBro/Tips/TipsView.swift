@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TipsView: View {
-    @State private var title: String = "Tip of the Day"
+    @State private var title: String = "Tip"
     @State private var tip: [String] = [
         "Try to keep your bedtime consistent — your body falls asleep faster with routine.",
         "If you often wake during the night, review your room temperature and comfort level.",
