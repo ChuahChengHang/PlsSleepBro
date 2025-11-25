@@ -260,23 +260,31 @@ struct ContentView: View {
     }
     
     func updateLightRing() {
-        var wake = setTimeToWakeUp
-        let sleep = sleepTime
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let sleep = today.addingTimeInterval(sleepTime.timeIntervalSince(calendar.startOfDay(for: sleepTime)))
+        var wake = today.addingTimeInterval(setTimeToWakeUp.timeIntervalSince(calendar.startOfDay(for: setTimeToWakeUp)))
+
         if wake <= sleep {
-            wake = Calendar.current.date(byAdding: .day, value: 1, to: wake)!
+            wake = calendar.date(byAdding: .day, value: 1, to: wake)!
         }
+
         let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake }
         let totalLight = lightInRange.reduce(0) { $0 + $1.light }
         let clampedLight = min(max(totalLight, 0), 100)
         lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
     }
-    
+
     func updateNoiseRing() {
-        var wake = setTimeToWakeUp
-        let sleep = sleepTime
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let sleep = today.addingTimeInterval(sleepTime.timeIntervalSince(calendar.startOfDay(for: sleepTime)))
+        var wake = today.addingTimeInterval(setTimeToWakeUp.timeIntervalSince(calendar.startOfDay(for: setTimeToWakeUp)))
+
         if wake <= sleep {
-            wake = Calendar.current.date(byAdding: .day, value: 1, to: wake)!
+            wake = calendar.date(byAdding: .day, value: 1, to: wake)!
         }
+
         let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
         let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
         let clampedNoise = min(max(totalNoise, 0), 100)
