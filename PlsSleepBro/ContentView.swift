@@ -103,6 +103,7 @@ struct ContentView: View {
                                                 .resizable()
                                                 .frame(width: 34, height: 55)
                                                 .foregroundStyle(.yellow)
+                                                .padding(.horizontal)
                                             ForEach(0..<10) { index in
                                                 if index == 3{
                                                     HStack {
@@ -167,6 +168,7 @@ struct ContentView: View {
                                                 .resizable()
                                                 .frame(width: 34, height: 40)
                                                 .foregroundStyle(.white)
+                                                .padding(.horizontal)
                                             ForEach(0..<10) { index in
                                                 if index == 3{
                                                     HStack {

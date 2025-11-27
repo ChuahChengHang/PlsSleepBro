@@ -15,7 +15,7 @@ struct LearnMoreView: View {
     var body: some View {
         VStack {
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color(red: 0.65, green: 0.20, blue: 0.25))
+                .fill(.tertiary)
                 .frame(width: 350, height: 700)
                 .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
                 .overlay(
@@ -77,6 +77,7 @@ struct LearnMoreView: View {
                     }
                 )
         }
+        .preferredColorScheme(.dark)
     }
 }
 
