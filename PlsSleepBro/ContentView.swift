@@ -46,7 +46,7 @@ struct ContentView: View {
                             )
                     }
                     .glassEffect(in: RoundedRectangle(cornerRadius: 40))
-                    .padding(2)
+                    .padding(5)
                     NavigationLink {
                         DurationView()
                     } label: {
