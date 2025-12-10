@@ -47,9 +47,11 @@ struct LightChartView: View {
                         selectedDateDataEmpty = true
                     }
                 } else {
-                    let averageLight = hourlyData.isEmpty
-                    ? 0
-                    : hourlyData.map { $0.value }.reduce(0, +) / Double(hourlyData.count)
+                    let nonZeroValues = hourlyData.map { $0.value }.filter { $0 > 0 }
+
+                    let averageLight = nonZeroValues.isEmpty
+                        ? 0
+                        : nonZeroValues.reduce(0, +) / Double(nonZeroValues.count)
                     
                     Chart(hourlyData, id: \.time) { entry in
                         LineMark(
@@ -136,15 +138,15 @@ struct LightChartView: View {
                             suggestions.append("Your sleep environment had moderately low light levels, which is generally good for melatonin production and sleep.")
                         }
                         
-                        if averageLight > 80 {
+                        if averageLight > 62 {
                             suggestions.append("Your environment was very bright. Consider reducing strong lighting to avoid disrupting sleep.")
                         }
                         
-                        if let maxLight = hourlyData.map({ $0.value }).max(), maxLight > 60 {
+                        if let maxLight = hourlyData.map({ $0.value }).max(), maxLight > 50 {
                             suggestions.append("There were moments of bright light. Try keeping your sleep environment dim and consistent.")
                         }
                         
-                        if averageLight > 10 && averageLight <= 80 && (hourlyData.map({ $0.value }).max() ?? 0) <= 60 {
+                        if averageLight > 10 && averageLight <= 40 && (hourlyData.map({ $0.value }).max() ?? 0) <= 50 {
                             suggestions.append("Your light exposure is within a reasonable range for sleep. Maintain a consistent dim environment for better rest.")
                         }
                     }
@@ -164,15 +166,15 @@ struct LightChartView: View {
                             suggestions.append("Your sleep environment had moderately low light levels, which is generally good for melatonin production and sleep.")
                         }
                         
-                        if averageLight > 80 {
+                        if averageLight > 62 {
                             suggestions.append("Your environment was very bright. Consider reducing strong lighting to avoid disrupting sleep.")
                         }
                         
-                        if let maxLight = hourlyData.map({ $0.value }).max(), maxLight > 60 {
+                        if let maxLight = hourlyData.map({ $0.value }).max(), maxLight > 50 {
                             suggestions.append("There were moments of bright light. Try keeping your sleep environment dim and consistent.")
                         }
                         
-                        if averageLight > 10 && averageLight <= 80 && (hourlyData.map({ $0.value }).max() ?? 0) <= 60 {
+                        if averageLight > 10 && averageLight <= 40 && (hourlyData.map({ $0.value }).max() ?? 0) <= 50 {
                             suggestions.append("Your light exposure is within a reasonable range for sleep. Maintain a consistent dim environment for better rest.")
                         }
                         

@@ -273,10 +273,32 @@ struct ContentView: View {
             wake = calendar.date(byAdding: .day, value: 1, to: wake)!
         }
         
-        let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake }
-        let totalLight = lightInRange.reduce(0) { $0 + $1.light }
-        let clampedLight = min(max(totalLight, 0), 100)
-        lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
+        let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake}
+//        let totalLight = lightInRange.reduce(0) { $0 + $1.light }
+//        let clampedLight = min(max(totalLight, 0), 100)
+//        lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
+        
+        let validLightValues = lightInRange
+            .map { $0.light }
+            .filter { $0 >= 1 }
+
+        let averageLight = validLightValues.isEmpty
+            ? 0
+            : validLightValues.reduce(0, +) / Double(validLightValues.count)
+
+        let idealLightThreshold: Double = 30
+        let maxLight: Double = 60
+        
+        let clampedAvg = max(0, min(averageLight, maxLight))
+        let block: Int
+        if clampedAvg <= idealLightThreshold {
+            block = Int((clampedAvg / 10).rounded())
+        } else {
+            let fraction = (clampedAvg - idealLightThreshold) / max(1, (maxLight - idealLightThreshold))
+            let extra = Int((fraction * 7).rounded(.down))
+            block = 3 + extra
+        }
+        lightFilledBlocks = max(0, min(10, block))
     }
     
     func updateNoiseRing() {
@@ -292,15 +314,15 @@ struct ContentView: View {
         let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
         let averageNoise = noiseInRange.isEmpty ? 0 : (noiseInRange.reduce(0) { $0 + $1.noise } / Double(noiseInRange.count))
 
-        let idealThreshold: Double = 30
+        let idealNoiseThreshold: Double = 30
         let maxNoise: Double = 70
         
         let clampedAvg = max(0, min(averageNoise, maxNoise))
         let blocks: Int
-        if clampedAvg <= idealThreshold {
+        if clampedAvg <= idealNoiseThreshold {
             blocks = Int((clampedAvg / 10).rounded())
         } else {
-            let fraction = (clampedAvg - idealThreshold) / max(1, (maxNoise - idealThreshold))
+            let fraction = (clampedAvg - idealNoiseThreshold) / max(1, (maxNoise - idealNoiseThreshold))
             let extra = Int((fraction * 7).rounded(.down))
             blocks = 3 + extra
         }
