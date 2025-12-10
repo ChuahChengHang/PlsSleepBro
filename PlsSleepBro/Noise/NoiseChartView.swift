@@ -181,7 +181,23 @@ struct NoiseChartView: View {
                 }
             }
         }
+        .onChange(of: date) {
+            updateSelectedDateDataEmpty()
+        }
+        .onChange(of: noiseData) {
+            updateSelectedDateDataEmpty()
+        }
         .preferredColorScheme(.dark)
+    }
+    private func updateSelectedDateDataEmpty() {
+        let calendar = Calendar.current
+        let selectedDate = calendar.date(byAdding: .day, value: offSet, to: date)!
+        
+        let dayEntries = noiseData.filter {
+            calendar.isDate($0.date, inSameDayAs: selectedDate)
+        }
+        
+        selectedDateDataEmpty = dayEntries.isEmpty
     }
 }
 
