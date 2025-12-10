@@ -290,9 +290,21 @@ struct ContentView: View {
         }
         
         let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
-        let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
-        let clampedNoise = min(max(totalNoise, 0), 100)
-        noiseFilledBlocks = Int((clampedNoise / 100 * 10).rounded())
+        let averageNoise = noiseInRange.isEmpty ? 0 : (noiseInRange.reduce(0) { $0 + $1.noise } / Double(noiseInRange.count))
+
+        let idealThreshold: Double = 30
+        let maxNoise: Double = 70
+        
+        let clampedAvg = max(0, min(averageNoise, maxNoise))
+        let blocks: Int
+        if clampedAvg <= idealThreshold {
+            blocks = Int((clampedAvg / 10).rounded())
+        } else {
+            let fraction = (clampedAvg - idealThreshold) / max(1, (maxNoise - idealThreshold))
+            let extra = Int((fraction * 7).rounded(.down))
+            blocks = 3 + extra
+        }
+        noiseFilledBlocks = max(0, min(10, blocks))
     }
 }
 

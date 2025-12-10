@@ -136,11 +136,11 @@ struct NoiseChartView: View {
                             if averageNoise == 0 {
                                 suggestions.append("No noise data recorded for this period.")
                                 return
-                            } else if averageNoise > 60 {
+                            } else if averageNoise > 50 {
                                 suggestions.append("Your environment was very noisy. Consider using earplugs, closing windows, or reducing nearby activity.")
                             } else if averageNoise > 30 {
                                 suggestions.append("Your noise levels were slightly high. Try reducing background noise or enabling white noise to mask sudden sounds.")
-                            } else if let maxNoise = hourlyData.map({ $0.value }).max(), maxNoise > 70 {
+                            } else if let maxNoise = hourlyData.map({ $0.value }).max(), maxNoise > 60 {
                                 suggestions.append("You experienced loud noise spikes. These may disturb sleep—try identifying and removing sudden noise sources.")
                             } else if averageNoise < 10 {
                                 suggestions.append("Excellent sleep environment! Very quiet and ideal for restful sleep.")
