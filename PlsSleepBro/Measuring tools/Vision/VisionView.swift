@@ -49,10 +49,10 @@ struct VisionView: View {
                 let percentage = String(format: "%.1f", luminance * 100)
                 let absolute = String(format: "%.3f", luminance)
                 VStack {
-//                    Text("Relative luminous intensity: \(percentage)%")
-//                        .font(.title3.bold())
-//                    Text("Luminous intensity (normalized 0-1): \(absolute)")
-//                        .font(.footnote)
+                    //                    Text("Relative luminous intensity: \(percentage)%")
+                    //                        .font(.title3.bold())
+                    //                    Text("Luminous intensity (normalized 0-1): \(absolute)")
+                    //                        .font(.footnote)
                 }
                 .task {
                     Task {
@@ -66,6 +66,20 @@ struct VisionView: View {
                             print("error: \(error.localizedDescription)")
                         }
                     }
+                }
+            }
+        }
+        // Have to do .onChange since swiftui won't rerender since there is NO UI change
+        .onChange(of: viewModel.latestLuminance) {
+            if let luminance = viewModel.latestLuminance {
+                let lux = luminance * 100
+                let entry = lightStruct(date: Date.now, light: lux)
+                context.insert(entry)
+                do {
+                    print("light: \(lux)")
+                    try context.save()
+                }catch {
+                    print("error: \(error.localizedDescription)")
                 }
             }
         }
