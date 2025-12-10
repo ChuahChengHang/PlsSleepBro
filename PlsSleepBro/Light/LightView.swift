@@ -13,6 +13,7 @@ struct LightView: View {
     @State private var selectedDate: Date = Date.now
     @State private var offset: Int = 0
     @State private var suggestion: [String] = []
+    @State private var selectedDateDataEmpty: Bool = false
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -22,7 +23,7 @@ struct LightView: View {
                         .padding(.top, 10)
                         .frame(width: 380, height: 400)
                         .overlay(
-                            LightChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion)
+                            LightChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion, selectedDateDataEmpty: $selectedDateDataEmpty)
                         )
                         .padding(.horizontal)
                 }
@@ -44,17 +45,27 @@ struct LightView: View {
                         }
                         .padding(.top, 10)
                     }else {
-                        LazyVStack(spacing: 0) {
-                            ForEach(suggestion, id: \.self) { suggestion in
-                                VStack(alignment: .leading, spacing: 0) {
-                                    Text(suggestion)
-                                        .padding()
-                                    Divider()
-                                }
-                                .background(Color(UIColor.systemBackground))
+                        if selectedDateDataEmpty {
+                            ContentUnavailableView {
+                                Text("No Data")
+                                    .bold()
+                            } description: {
+                                Text("Suggestions will appear here.")
                             }
+                            .padding(.top, 10)
+                        }else {
+                            LazyVStack(spacing: 0) {
+                                ForEach(suggestion, id: \.self) { suggestion in
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        Text(suggestion)
+                                            .padding()
+                                        Divider()
+                                    }
+                                    .background(Color(UIColor.systemBackground))
+                                }
+                            }
+                            .padding(.horizontal, 6)
                         }
-                        .padding(.horizontal, 6)
                     }
                     Spacer()
                 }
