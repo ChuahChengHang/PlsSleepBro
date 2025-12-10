@@ -18,13 +18,10 @@ struct NoiseView: View {
         NavigationStack {
             ScrollView {
                 VStack {
-                    DatePicker("", selection: $selectedDate, in: ...Date(), displayedComponents: [.date])
-                        .datePickerStyle(.compact)
-                        .offset(x: -140)
-                        .sensoryFeedback(.impact(weight: .light), trigger: selectedDate)
                     RoundedRectangle(cornerRadius: 18)
                         .fill(.quaternary)
                         .frame(width: 380, height: 400)
+                        .padding(.top, 10)
                         .overlay(
                             NoiseChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion)
                         )
@@ -38,15 +35,19 @@ struct NoiseView: View {
                     }
                     .padding()
                     if noiseData.isEmpty {
-                        RoundedRectangle(cornerRadius: 18)
-                            .fill(.quaternary)
-                            .frame(width: 380, height: 400)
-                            .overlay(
-                                Text("No Available Data")
-                                    .font(.largeTitle)
-                                    .bold()
-                            )
-                            .padding(.horizontal)
+//                        RoundedRectangle(cornerRadius: 18)
+//                            .fill(.quaternary)
+//                            .frame(width: 380, height: 100)
+//                            .overlay(
+                                ContentUnavailableView {
+                                    Text("No Data")
+                                        .bold()
+                                } description: {
+                                    Text("Suggestions will appear here.")
+                                }
+                                    .padding(.top, 10)
+//                            )
+//                            .padding(.horizontal)
                     }else {
                         LazyVStack(spacing: 0) {
                             ForEach(suggestion, id: \.self) { suggestion in
@@ -64,6 +65,17 @@ struct NoiseView: View {
             }
             .preferredColorScheme(.dark)
             .navigationTitle("Noise")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    DatePicker("",selection: $selectedDate,
+                        in: ...Date(),
+                        displayedComponents: [.date]
+                    )
+                    .datePickerStyle(.compact)
+                    .sensoryFeedback(.impact(weight: .light), trigger: selectedDate)
+                    .labelsHidden()
+                }
+            }
         }
     }
 }

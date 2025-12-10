@@ -162,7 +162,11 @@ struct NoiseChartView: View {
                 }
             }
             }else {
-                Text("No Data Available")
+                ContentUnavailableView {
+                    Label("No Data", systemImage: "xmark.circle")
+                } description: {
+                    Text("Graph of recent nosise duration will appear here.")
+                }
             }
         }
         .preferredColorScheme(.dark)

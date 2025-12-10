@@ -81,18 +81,18 @@ struct TipsView: View {
             }
             .padding(20)
             .background(
-                RoundedRectangle(cornerRadius: 24)
+                RoundedRectangle(cornerRadius: 14)
                     .fill(Color.yellow.opacity(0.2))
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 24))
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 24)
+                RoundedRectangle(cornerRadius: 14)
                     .stroke(.white.opacity(0.15), lineWidth: 1)
             )
             .shadow(color: .black.opacity(0.4), radius: 12, y: 6)
             .padding(.horizontal, 20)
         }
-//        .glassEffect(in: RoundedRectangle(cornerRadius: 24))
+//        .glassEffect(in: RoundedRectangle(cornerRadius: 14))
         .onAppear {
             message = tip.randomElement()!
             messageIndex = tip.firstIndex(of: message)!

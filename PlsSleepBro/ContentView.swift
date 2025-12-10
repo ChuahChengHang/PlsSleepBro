@@ -76,7 +76,7 @@ struct ContentView: View {
                                         }
                                     }
                                 }
-                                    .padding()
+                                    .padding(25)
                             )
                     }
                     .foregroundColor(Color.gray.opacity(0.2))
@@ -115,9 +115,10 @@ struct ContentView: View {
                                                                 .font(.caption)
                                                                 .foregroundColor(.green)
                                                         }
+                                                        .padding([.trailing, .leading, .bottom], -14)
                                                         Rectangle()
                                                             .frame(width: 14, height: 40)
-                                                            .foregroundStyle(index < noiseFilledBlocks ? Color.white : Color.clear)
+                                                            .foregroundStyle(index < lightFilledBlocks ? Color.yellow : Color.clear)
                                                             .overlay(
                                                                 Rectangle()
                                                                     .stroke(Color.primary, lineWidth: 2)
@@ -180,6 +181,7 @@ struct ContentView: View {
                                                                 .font(.caption)
                                                                 .foregroundColor(.green)
                                                         }
+                                                        .padding([.trailing, .leading, .bottom], -14)
                                                         Rectangle()
                                                             .frame(width: 14, height: 40)
                                                             .foregroundStyle(index < noiseFilledBlocks ? Color.white : Color.clear)
@@ -266,27 +268,27 @@ struct ContentView: View {
         let today = calendar.startOfDay(for: Date())
         let sleep = today.addingTimeInterval(sleepTime.timeIntervalSince(calendar.startOfDay(for: sleepTime)))
         var wake = today.addingTimeInterval(setTimeToWakeUp.timeIntervalSince(calendar.startOfDay(for: setTimeToWakeUp)))
-
+        
         if wake <= sleep {
             wake = calendar.date(byAdding: .day, value: 1, to: wake)!
         }
-
+        
         let lightInRange = lightData.filter { $0.date >= sleep && $0.date <= wake }
         let totalLight = lightInRange.reduce(0) { $0 + $1.light }
         let clampedLight = min(max(totalLight, 0), 100)
         lightFilledBlocks = Int((clampedLight / 100 * 10).rounded())
     }
-
+    
     func updateNoiseRing() {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let sleep = today.addingTimeInterval(sleepTime.timeIntervalSince(calendar.startOfDay(for: sleepTime)))
         var wake = today.addingTimeInterval(setTimeToWakeUp.timeIntervalSince(calendar.startOfDay(for: setTimeToWakeUp)))
-
+        
         if wake <= sleep {
             wake = calendar.date(byAdding: .day, value: 1, to: wake)!
         }
-
+        
         let noiseInRange = noiseData.filter { $0.date >= sleep && $0.date <= wake }
         let totalNoise = noiseInRange.reduce(0) { $0 + $1.noise }
         let clampedNoise = min(max(totalNoise, 0), 100)

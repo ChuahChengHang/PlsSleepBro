@@ -17,12 +17,9 @@ struct LightView: View {
         NavigationStack {
             ScrollView {
                 VStack {
-                    DatePicker("", selection: $selectedDate, in: ...Date(), displayedComponents: [.date])
-                        .datePickerStyle(.compact)
-                        .offset(x: -140)
-                        .sensoryFeedback(.impact(weight: .light), trigger: selectedDate)
                     RoundedRectangle(cornerRadius: 18)
                         .fill(.quaternary)
+                        .padding(.top, 10)
                         .frame(width: 380, height: 400)
                         .overlay(
                             LightChartView(date: $selectedDate, offSet: $offset, suggestions: $suggestion)
@@ -39,15 +36,13 @@ struct LightView: View {
                     }
                     .padding()
                     if lightData.isEmpty {
-                        RoundedRectangle(cornerRadius: 18)
-                            .fill(.quaternary)
-                            .frame(width: 380, height: 400)
-                            .overlay(
-                                Text("No Available Data")
-                                    .font(.largeTitle)
-                                    .bold()
-                            )
-                            .padding(.horizontal)
+                        ContentUnavailableView {
+                            Text("No Data")
+                                .bold()
+                        } description: {
+                            Text("Suggestions will appear here.")
+                        }
+                        .padding(.top, 10)
                     }else {
                         LazyVStack(spacing: 0) {
                             ForEach(suggestion, id: \.self) { suggestion in
@@ -66,6 +61,17 @@ struct LightView: View {
             }
             .preferredColorScheme(.dark)
             .navigationTitle("Light")
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    DatePicker("",selection: $selectedDate,
+                               in: ...Date(),
+                               displayedComponents: [.date]
+                    )
+                    .datePickerStyle(.compact)
+                    .sensoryFeedback(.impact(weight: .light), trigger: selectedDate)
+                    .labelsHidden()
+                }
+            }
         }
     }
 }

@@ -44,12 +44,12 @@ struct ActivityRingView: View {
                         endAngle: .degrees(360)
                     ),
                     style: StrokeStyle(lineWidth: 20, lineCap: .round)
-            ).rotationEffect(.degrees(-90))
+                ).rotationEffect(.degrees(-90))
                 .animation(.easeOut(duration: 1.2), value: progress)
-//            Circle()
-//                .frame(width: 20, height: 20)
-//                .foregroundColor(Color.darkRed)
-//                .offset(y: -80)
+            //            Circle()
+            //                .frame(width: 20, height: 20)
+            //                .foregroundColor(Color.darkRed)
+            //                .offset(y: -80)
         }.frame(idealWidth: 300, idealHeight: 300, alignment: .center)
     }
 }

@@ -19,52 +19,52 @@ struct SixMonthsView: View {
             if !durationData.isEmpty {
                 let calendar = Calendar.current
                 let today = Date()
-
-                let startOfMonth = calendar.date(
+                
+                let endMonth = calendar.date(
                     from: calendar.dateComponents([.year, .month], from: today)
                 )!
-
-                let startOfSelectedPeriod = calendar.date(
+                
+                let startMonth = calendar.date(
                     byAdding: .month,
-                    value: offset * 6,
-                    to: startOfMonth
+                    value: -5 + (offset * -6),
+                    to: endMonth
                 )!
-
+                
                 let monthStartDates = (0..<6).compactMap { index in
-                    calendar.date(byAdding: .month, value: -index, to: startOfSelectedPeriod)
+                    calendar.date(byAdding: .month, value: index, to: startMonth)
                 }.sorted()
-
+                
                 let monthlyData = monthStartDates.map { monthStart in
                     let total = durationData
                         .filter { calendar.isDate($0.date, equalTo: monthStart, toGranularity: .month) }
                         .map { $0.duration }
                         .reduce(0, +)
-
+                    
                     return (monthStart: monthStart, totalHours: total)
                 }
-
+                
                 let averageDuration = monthlyData.map { $0.totalHours }.reduce(0, +) / 6
                 let firstMonth = monthStartDates.first!
                 let lastMonth = monthStartDates.last!
-
+                
                 Chart(monthlyData, id: \.monthStart) { monthStart, totalHours in
                     LineMark(
                         x: .value("Month", monthStart),
                         y: .value("Hours", totalHours)
                     )
-
+                    
                     PointMark(
                         x: .value("Month", monthStart),
                         y: .value("Hours", totalHours)
                     )
-
+                    
                     RuleMark(y: .value("Average", averageDuration))
                         .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
                         .foregroundStyle(.yellow)
                         .annotation(position: .bottom) {
                             Text("avg").foregroundStyle(.yellow)
                         }
-
+                    
                     RuleMark(y: .value("Recommended", 280))
                         .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
                         .foregroundStyle(.green)
@@ -101,29 +101,29 @@ struct SixMonthsView: View {
                     }
                         .padding(), alignment: .bottom
                 )
-//                .animation(.easeInOut, value: offset)
+                //                .animation(.easeInOut, value: offset)
                 .onAppear {
                     average = averageDuration
                 }
-                .onChange(of: startOfSelectedPeriod) {
+                .onChange(of: startMonth) {
                     average = averageDuration
                 }
-//                .gesture(
-//                    DragGesture()
-//                        .updating($dragOffset) { value, state, _ in
-//                            state = value.translation.width
-//                        }
-//                        .onEnded { value in
-//                            let threshold: CGFloat = 80
-//                            if value.translation.width < -threshold {
-//                                offset += 1
-//                            } else if value.translation.width > threshold {
-//                                offset -= 1
-//                            }
-//                        }
-//                )
-//                .sensoryFeedback(.increase, trigger: offset)
-//                .sensoryFeedback(.decrease, trigger: offset)
+                //                .gesture(
+                //                    DragGesture()
+                //                        .updating($dragOffset) { value, state, _ in
+                //                            state = value.translation.width
+                //                        }
+                //                        .onEnded { value in
+                //                            let threshold: CGFloat = 80
+                //                            if value.translation.width < -threshold {
+                //                                offset += 1
+                //                            } else if value.translation.width > threshold {
+                //                                offset -= 1
+                //                            }
+                //                        }
+                //                )
+                //                .sensoryFeedback(.increase, trigger: offset)
+                //                .sensoryFeedback(.decrease, trigger: offset)
             } else {
                 Text("No Data Available")
             }

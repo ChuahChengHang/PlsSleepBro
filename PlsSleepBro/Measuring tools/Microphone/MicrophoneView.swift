@@ -65,7 +65,7 @@ struct MicrophoneView: View {
             saveTask = Task {
                 while !Task.isCancelled {
                     do {
-                        let positiveNoise = max(0, monitor.decibelLevel + 80)
+                        let positiveNoise = max(0, monitor.decibelLevel + 70)
                         let noiseEntry = noiseStruct(date: Date(), noise: positiveNoise)
 
                         context.insert(noiseEntry)
