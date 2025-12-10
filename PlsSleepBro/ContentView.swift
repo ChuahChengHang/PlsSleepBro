@@ -33,7 +33,7 @@ struct ContentView: View {
                     TipsView()
                     Button {
                         sleepTime = Date.now
-                        withAnimation { showSleepView = true }
+                        withAnimation(.easeInOut) { showSleepView = true }
                     } label: {
                         RoundedRectangle(cornerRadius: 40)
                             .fill(Color.red)
@@ -236,7 +236,7 @@ struct ContentView: View {
                 }
             }
         } else {
-            withAnimation {
+            withAnimation(.easeInOut) {
                 SleepView(showSleepView: $showSleepView, sleepTime: $sleepTime)
             }
         }
