@@ -122,8 +122,9 @@ final class CameraViewModel: NSObject, ObservableObject {
                 self.statusMessage = "Measuring luminance every minute"
                 self.scheduleTimer()
             }
-            // Trigger the first capture as soon as the session is ready.
-            self.capturePhoto()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.capturePhoto()
+            }
         }
     }
 

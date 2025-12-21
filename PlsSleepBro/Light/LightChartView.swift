@@ -47,7 +47,7 @@ struct LightChartView: View {
                         selectedDateDataEmpty = true
                     }
                 } else {
-                    let nonZeroValues = hourlyData.map { $0.value }.filter { $0 > 0 }
+                    let nonZeroValues = hourlyData.map { $0.value }.filter { $0 > 1.0 }
 
                     let averageLight = nonZeroValues.isEmpty
                         ? 0
@@ -125,6 +125,10 @@ struct LightChartView: View {
                     //            .sensoryFeedback(.increase, trigger: halfDayStartHour)
                     //            .sensoryFeedback(.decrease, trigger: halfDayStartHour)
                     .onAppear {
+                        
+                        print("Avg Light: ", averageLight)
+                        print("Max Light: ", hourlyData.map({ $0.value }).max() ?? 0)
+                        
                         if averageLight == 0 {
                             suggestions.append("No light data detected for this period.")
                             return
@@ -138,7 +142,7 @@ struct LightChartView: View {
                             suggestions.append("Your sleep environment had moderately low light levels, which is generally good for melatonin production and sleep.")
                         }
                         
-                        if averageLight > 62 {
+                        if averageLight > 58 {
                             suggestions.append("Your environment was very bright. Consider reducing strong lighting to avoid disrupting sleep.")
                         }
                         
@@ -166,7 +170,7 @@ struct LightChartView: View {
                             suggestions.append("Your sleep environment had moderately low light levels, which is generally good for melatonin production and sleep.")
                         }
                         
-                        if averageLight > 62 {
+                        if averageLight > 58 {
                             suggestions.append("Your environment was very bright. Consider reducing strong lighting to avoid disrupting sleep.")
                         }
                         

@@ -54,19 +54,19 @@ struct VisionView: View {
                     //                    Text("Luminous intensity (normalized 0-1): \(absolute)")
                     //                        .font(.footnote)
                 }
-                .task {
-                    Task {
-                        let lux = luminance * 100
-                        let entry = lightStruct(date: Date.now, light: lux)
-                        context.insert(entry)
-                        do {
-                            print("light: \(lux)")
-                            try context.save()
-                        }catch {
-                            print("error: \(error.localizedDescription)")
-                        }
-                    }
-                }
+//                .task {
+//                    Task {
+//                        let lux = luminance * 100
+//                        let entry = lightStruct(date: Date.now, light: lux)
+//                        context.insert(entry)
+//                        do {
+//                            print("light: \(lux)")
+//                            try context.save()
+//                        }catch {
+//                            print("error: \(error.localizedDescription)")
+//                        }
+//                    }
+//                }
             }
         }
         // Have to do .onChange since swiftui won't rerender since there is NO UI change
