@@ -48,10 +48,10 @@ struct LightChartView: View {
                     }
                 } else {
                     let nonZeroValues = hourlyData.map { $0.value }.filter { $0 > 1.0 }
-
+                    
                     let averageLight = nonZeroValues.isEmpty
-                        ? 0
-                        : nonZeroValues.reduce(0, +) / Double(nonZeroValues.count)
+                    ? 0
+                    : nonZeroValues.reduce(0, +) / Double(nonZeroValues.count)
                     
                     Chart(hourlyData, id: \.time) { entry in
                         LineMark(
@@ -192,6 +192,7 @@ struct LightChartView: View {
                 }
             }
         }
+        .preferredColorScheme(.dark)
         .onChange(of: date) {
             updateSelectedDateDataEmpty()
         }
