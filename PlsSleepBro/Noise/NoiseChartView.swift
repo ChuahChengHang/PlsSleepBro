@@ -41,7 +41,7 @@ struct NoiseChartView: View {
                     ContentUnavailableView {
                         Label("No Data", systemImage: "xmark.circle")
                     } description: {
-                        Text("Graph of recent nosise duration will appear here.")
+                        Text("Graph of recent noise will appear here.")
                     }
                     .onAppear {
                         selectedDateDataEmpty = true
@@ -177,7 +177,7 @@ struct NoiseChartView: View {
                 ContentUnavailableView {
                     Label("No Data", systemImage: "xmark.circle")
                 } description: {
-                    Text("Graph of recent nosise duration will appear here.")
+                    Text("Graph of recent noise will appear here.")
                 }
             }
         }
