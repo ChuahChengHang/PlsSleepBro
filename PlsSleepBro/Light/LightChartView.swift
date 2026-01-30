@@ -134,12 +134,16 @@ struct LightChartView: View {
                             return
                         }
                         
-                        if averageLight <= 10 {
+                        if averageLight > 0 && averageLight <= 10{
                             suggestions.append("Your room was extremely dark, which is ideal for sleep. Keep up the good sleep environment!")
                         }
                         
                         if averageLight > 10 && averageLight < 30 {
                             suggestions.append("Your sleep environment had moderately low light levels, which is generally good for melatonin production and sleep.")
+                        }
+                        
+                        if averageLight > 29 && averageLight < 59 {
+                            suggestions.append("Your sleep environment had moderate light levels. You should be mindful of strong lighting.")
                         }
                         
                         if averageLight > 58 {
@@ -162,12 +166,16 @@ struct LightChartView: View {
                             return
                         }
                         
-                        if averageLight <= 10 {
+                        if averageLight > 0 && averageLight <= 10 {
                             suggestions.append("Your room was extremely dark, which is ideal for sleep. Keep up the good sleep environment!")
                         }
                         
                         if averageLight > 10 && averageLight < 30 {
                             suggestions.append("Your sleep environment had moderately low light levels, which is generally good for melatonin production and sleep.")
+                        }
+                        
+                        if averageLight > 29 && averageLight < 59 {
+                            suggestions.append("Your sleep environment had moderate light levels. You should be mindful of strong lighting.")
                         }
                         
                         if averageLight > 58 {
