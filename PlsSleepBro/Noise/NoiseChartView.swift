@@ -84,7 +84,7 @@ struct NoiseChartView: View {
                         Text("X-Axis: Time(Hour)")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        Text("Y-Axis: Average Noise Per Hour")
+                        Text("Y-Axis: Average Noise Per Hour(dB)")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
